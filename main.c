@@ -1,5 +1,8 @@
 #include <avr/io.h>
 #include <util/delay.h>
+#include<stdio.h> 
+#include<stdlib.h>
+#include<string.h>
 
 
 #define FOSC 13000000 // Clock Speed
@@ -47,10 +50,11 @@ int main() {
     while(1){
         //USART_Transmit_String(" Nothing to see buds ");
         //char s = USART_Receive();
-        //value = PIND;
-        char res = value;
+        value = PIND;
+        char res = value + '0';
         char test = 'b';
-        USART_Transmit(test);
+        USART_Transmit(res);
+
         _delay_ms(1000);
         //USART_Transmit_String("\n");
     }
