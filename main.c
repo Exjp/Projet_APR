@@ -1,6 +1,7 @@
 #include <avr/io.h>
 #include <util/delay.h>
 
+
 #define FOSC 13000000 // Clock Speed
 #define BAUD 38400
 #define MYUBRR FOSC/16/BAUD-1
@@ -45,12 +46,13 @@ int main() {
     USART_Init(MYUBRR);
     while(1){
         //USART_Transmit_String(" Nothing to see buds ");
-        char s = USART_Receive();
-        value = PIND;
+        //char s = USART_Receive();
+        //value = PIND;
         char res = value;
         char test = 'b';
-        USART_Transmit(res);
-        USART_Transmit_String("\n");
+        USART_Transmit(test);
+        _delay_ms(1000);
+        //USART_Transmit_String("\n");
     }
 }
 //avrdude -p m328p -c arduino -P COM7 -U flash:w:a.bin
