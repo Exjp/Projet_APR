@@ -52,7 +52,7 @@ int main() {
         //  receive = 'm';
         //}
         value = PIND; //Aimant: recupérer la veleur du capteur aimant
-        //char res = value;
+        char res = value + '0'; //transformation de l'int en char
         char send_back = receive;
         USART_Transmit(send_back);
         //_delay_ms(1);
