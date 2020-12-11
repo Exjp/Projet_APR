@@ -86,6 +86,11 @@ int main() {
         PORTC |= _BV(PC2);
         PORTC &= _BV(PC2);
         _delay_ms(1000);
+        SPI_MasterTransmit(value2);
+        SPI_MasterTransmit(value2);
+        PORTC |= _BV(PC2);
+        PORTC &= _BV(PC2);
+        _delay_ms(1000);
 
 
         //USART_Transmit_String("\n");
