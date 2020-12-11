@@ -48,16 +48,16 @@ void USART_Init(unsigned int ubrr){
 
 int main() {
     // Active et allume la broche PB5 (led)
-    DDRD &= _BV(PD2);
+    DDRD &= _BV(PD2); //active la broche PD2 en mode input pour pouvoir lire l'état du capteur aimant
     int value;
-    USART_Init(MYUBRR);
+    USART_Init(MYUBRR); //initialisation de l'USART
     while(1){
         //USART_Transmit_String(" Nothing to see buds ");
         char receive = USART_Receive();
         //if (receive == ''){
         //  receive = 'm';
         //}
-        //value = PIND;
+        value = PIND; //Aimant: recupérer la veleur du capteur aimant
         //char res = value;
         char send_back = receive;
         USART_Transmit(send_back);
