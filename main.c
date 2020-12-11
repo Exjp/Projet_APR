@@ -1,7 +1,8 @@
 #include <avr/io.h>
 #include <util/delay.h>
 #include <stddef.h>
-
+#include<avr/interrupt.h>
+#include<stdio.h> 
 
 #define FOSC 13000000 // Clock Speed
 #define BAUD 38400
@@ -40,21 +41,56 @@ void USART_Init(unsigned int ubrr){
     UCSR0C = (1<<USBS0)|(3<<UCSZ00);
 }
 
+
+int count = 0;
+
+ISR(TIMER0_OVF_vect) {
+    count++;
+}
+
 int main() {
     // Active et allume la broche PB5 (led)
     DDRD &= _BV(PD2); //active la broche PD2 en mode input pour pouvoir lire l'état du capteur aimant
     int value;
     USART_Init(MYUBRR); //initialisation de l'USART
+
+    // On active le timer
+    // Dans le registre TCCR0B, on met à 1 les bits CS00 et CS02
+    // TCCR0B = (1<<CS00) | (1<<CS02);
+    TCCR0B = _BV(CS00) | _BV(CS02); //On va chercer le bit value de CS00 et CS02
+    // TCCR0B = 0B00000101;
+
+    // on active l'interruption du timer, on modifie le registre TIMSK0. On peut activer les modes WGM pour gérer la limite du registre
+    TIMSK0 = (1<<TOIE0);
+    // TIMSK0 = 0B00000001;
+    sei();
+    
+
     while(1){
         //USART_Transmit_String(" Nothing to see buds ");
-        char receive = USART_Receive();
+        
+        // Le timer marche sans le receive
+        // char receive = USART_Receive();
+        
         //if (receive == ''){
         //  receive = 'm';
         //}
-        value = PIND; //Aimant: recupérer la veleur du capteur aimant
-        char res = value + '0'; //transformation de l'int en char
-        char send_back = receive;
-        USART_Transmit(send_back);
+
+        // value = PIND; //Aimant: recupérer la veleur du capteur aimant
+        // char res = value + '0'; //transformation de l'int en char
+        // char send_back = receive;
+        // USART_Transmit(send_back);
+
+
+        char buffer[32]; 
+
+        sprintf(buffer,"counter = %d",count);
+
+        USART_Transmit_String(buffer);
+        _delay_ms(1000);
+        
+        
+        
         //_delay_ms(1);
         //USART_Transmit_String("\n");
     }
