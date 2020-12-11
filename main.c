@@ -1,5 +1,6 @@
 #include <avr/io.h>
 #include <util/delay.h>
+#include <stddef.h>
 
 
 #define FOSC 13000000 // Clock Speed
@@ -46,12 +47,15 @@ int main() {
     USART_Init(MYUBRR);
     while(1){
         //USART_Transmit_String(" Nothing to see buds ");
-        //char s = USART_Receive();
+        char receive = USART_Receive();
+        //if (receive == ''){
+        //  receive = 'm';
+        //}
         //value = PIND;
-        char res = value;
-        char test = 'b';
-        USART_Transmit(test);
-        _delay_ms(1000);
+        //char res = value;
+        char send_back = receive;
+        USART_Transmit(send_back);
+        //_delay_ms(1);
         //USART_Transmit_String("\n");
     }
 }
