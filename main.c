@@ -1,12 +1,6 @@
 #include <avr/io.h>
 #include <util/delay.h>
-<<<<<<< HEAD
 #include <stddef.h>
-=======
-#include<stdio.h>
-#include<stdlib.h>
-#include<string.h>
->>>>>>> 1a23619170bde6cfe2d1a5c9cf9106df238d993c
 
 
 #define FOSC 13000000 // Clock Speed
