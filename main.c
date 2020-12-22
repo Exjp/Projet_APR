@@ -61,10 +61,9 @@ ISR(TIMER0_OVF_vect) {
 }
 
 int main() {
-    // Active et allume la broche PB5 (led)
-    DDRD &= _BV(PD2); //active la broche PD2 en mode input pour pouvoir lire l'état du capteur aimant
-    int value;
     USART_Init(MYUBRR); //initialisation de l'USART
+
+    // DDRD &= _BV(PD2); //active la broche PD2 en mode input pour pouvoir lire l'état du capteur aimant
 
     // On active le timer
     // Dans le registre TCCR0B, on met à 1 les bits CS00 et CS02
@@ -78,26 +77,21 @@ int main() {
     sei();
     
 
-    // DDRD &= _BV(PD2);
+    // Active et allume la broche PB5 (led)
+    // SPI_MasterInit();
+    // DDRB |= _BV(PB4);
+    // DDRC |= _BV(PC1);
+    // DDRC |= _BV(PC2);
+    // DDRB |= _BV(PB2); // faut le mettre à 0, ça peut merder (histoire master/slave)s
+    // int value1 = 0B00000001;
+    // int value2 = 0B00000000; 
 
-    SPI_MasterInit();
-    DDRB |= _BV(PB4);
-    DDRC |= _BV(PC1);
-    DDRC |= _BV(PC2);
-    DDRB |= _BV(PB2); // faut le mettre à 0, ça peut merder (histoire master/slave)s
-    int value1 = 0B00000001;
-    int value2 = 0B00000000; 
-
-    // USART_Init(MYUBRR);
     while(1){
 
         // MAGNET
         //USART_Transmit_String(" Nothing to see buds ");
         //char s = USART_Receive();
-        value = PIND;
-        char res = value + '0';
-        char test = 'b';
-        USART_Transmit(res);
+ 
 
         // value = PIND; //Aimant: recupérer la veleur du capteur aimant
         // char res = value + '0'; //transformation de l'int en char
@@ -110,23 +104,19 @@ int main() {
         sprintf(buffer,"counter = %d",count);
 
         USART_Transmit_String(buffer);
-        // value = PIND;
-        // char res = value + '0';
-        // char test = 'b';
-        // USART_Transmit(res);
-
-
 
         //Allumage de ses morts de la lumière
-        SPI_MasterTransmit(value1);
-        SPI_MasterTransmit(value2);
-        PORTC |= _BV(PC2);
-        PORTC &= _BV(PC2);
-        _delay_ms(1000);
-        SPI_MasterTransmit(value2);
-        SPI_MasterTransmit(value2);
-        PORTC |= _BV(PC2);
-        PORTC &= _BV(PC2);
+
+        // SPI_MasterTransmit(value1);
+        // SPI_MasterTransmit(value2);
+        // PORTC |= _BV(PC2);
+        // PORTC &= _BV(PC2);
+        // _delay_ms(1000);
+        // SPI_MasterTransmit(value2);
+        // SPI_MasterTransmit(value2);
+        // PORTC |= _BV(PC2);
+        // PORTC &= _BV(PC2);
+
         _delay_ms(1000);
 
 
