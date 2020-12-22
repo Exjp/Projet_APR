@@ -41,6 +41,18 @@ void USART_Init(unsigned int ubrr){
     UCSR0C = (1<<USBS0)|(3<<UCSZ00);
 }
 
+void SPI_MasterInit(void){
+    DDRB = (1<<DDB3) | (1<<DDB5) | (1<<DDB2);
+    SPCR = (1<<SPE)|(1<<MSTR)|(1<<DDB5);
+}
+
+void SPI_MasterTransmit(char cData) {
+    SPDR = cData;
+    while(!(SPSR & (1<<SPIF))) {
+        
+    }
+}
+
 
 int count = 0;
 
@@ -66,15 +78,26 @@ int main() {
     sei();
     
 
+    // DDRD &= _BV(PD2);
+
+    SPI_MasterInit();
+    DDRB |= _BV(PB4);
+    DDRC |= _BV(PC1);
+    DDRC |= _BV(PC2);
+    DDRB |= _BV(PB2); // faut le mettre à 0, ça peut merder (histoire master/slave)s
+    int value1 = 0B00000001;
+    int value2 = 0B00000000; 
+
+    // USART_Init(MYUBRR);
     while(1){
+
+        // MAGNET
         //USART_Transmit_String(" Nothing to see buds ");
-        
-        // Le timer marche sans le receive
-        // char receive = USART_Receive();
-        
-        //if (receive == ''){
-        //  receive = 'm';
-        //}
+        //char s = USART_Receive();
+        value = PIND;
+        char res = value + '0';
+        char test = 'b';
+        USART_Transmit(res);
 
         // value = PIND; //Aimant: recupérer la veleur du capteur aimant
         // char res = value + '0'; //transformation de l'int en char
@@ -87,11 +110,26 @@ int main() {
         sprintf(buffer,"counter = %d",count);
 
         USART_Transmit_String(buffer);
+        // value = PIND;
+        // char res = value + '0';
+        // char test = 'b';
+        // USART_Transmit(res);
+
+
+
+        //Allumage de ses morts de la lumière
+        SPI_MasterTransmit(value1);
+        SPI_MasterTransmit(value2);
+        PORTC |= _BV(PC2);
+        PORTC &= _BV(PC2);
         _delay_ms(1000);
-        
-        
-        
-        //_delay_ms(1);
+        SPI_MasterTransmit(value2);
+        SPI_MasterTransmit(value2);
+        PORTC |= _BV(PC2);
+        PORTC &= _BV(PC2);
+        _delay_ms(1000);
+
+
         //USART_Transmit_String("\n");
     }
 }
