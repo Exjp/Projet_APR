@@ -67,35 +67,92 @@ ISR(TIMER0_OVF_vect) {
     }
 }
 
-int main() {
-    USART_Init(MYUBRR); //initialisation de l'USART
+ISR(INT0_vect) {
+    count++;
+}
 
-    // DDRD &= _BV(PD2); //active la broche PD2 en mode input pour pouvoir lire l'état du capteur aimant
+void led_init(){
 
+    // Active et allume la broche PB5 (led)
+    SPI_MasterInit();
+    DDRB |= _BV(PB4);
+    DDRC |= _BV(PC1);
+    DDRC |= _BV(PC2);
+    DDRB |= _BV(PB2); // faut le mettre à 0, ça peut merder (histoire master/slave)s
+    
+
+}
+
+void led_exec(){
+        int value1 = 0B00000001;
+        int value2 = 0B00000000; 
+        
+        SPI_MasterTransmit(value1);
+        SPI_MasterTransmit(value2);
+        PORTC |= _BV(PC2);
+        PORTC &= _BV(PC2);
+        _delay_ms(1000);
+        SPI_MasterTransmit(value2);
+        SPI_MasterTransmit(value2);
+        PORTC |= _BV(PC2);
+        PORTC &= _BV(PC2);
+}
+
+void timer_init(){
     // On active le timer
     // Dans le registre TCCR0B, on met à 1 les bits CS00 et CS02
     // TCCR0B = (1<<CS00) | (1<<CS02);
     TCCR0B = _BV(CS00) | _BV(CS02); //On va chercer le bit value de CS00 et CS02
     // TCCR0B = 0B00000101;
 
+    sei();
+    
+}
+
+void timer_interrupt(){
 
     // on active l'interruption du timer, on modifie le registre TIMSK0. On peut activer les modes WGM pour gérer la limite du registre
     TIMSK0 = (1<<TOIE0);
     // TIMSK0 = 0B00000001;
 
     // TCCR0A = _BV(WGM00);
+}
+
+void magnet_init(){
+    // DDRD &= ~(1 << PIND2); //active la broche PD2 en mode input pour pouvoir lire l'état du capteur aimant
+
+    DDRD &= ~(1 << PIND2);
+
+    PCICR |= (1 << PCIE2);
+     // PCICR = (1<<PCIE2);
+
+     // PCMSK0 = (1<<PCINT0);
+
+}
+
+void magnet_interrupt(){
+
+    // EIMSK = (1<<INT0);
+   
     
-    sei();
+    EIMSK |= (1 << INT0);
+
+
+}
+
+int main() {
+    USART_Init(MYUBRR); //initialisation de l'USART
+
+    magnet_init();
+    magnet_interrupt();
+
+    // timer_interrupt();
+    // timer_init();
+    
+    // led_init();
     
 
-    // Active et allume la broche PB5 (led)
-    // SPI_MasterInit();
-    // DDRB |= _BV(PB4);
-    // DDRC |= _BV(PC1);
-    // DDRC |= _BV(PC2);
-    // DDRB |= _BV(PB2); // faut le mettre à 0, ça peut merder (histoire master/slave)s
-    // int value1 = 0B00000001;
-    // int value2 = 0B00000000; 
+    
 
     while(1){
 
@@ -112,21 +169,11 @@ int main() {
 
         char buffer[32]; 
 
-        sprintf(buffer,"counter = %d\n",tru_count);
+        sprintf(buffer,"counter = %d\n",count);
 
         USART_Transmit_String(buffer);
 
-        //Allumage de ses morts de la lumière
-
-        // SPI_MasterTransmit(value1);
-        // SPI_MasterTransmit(value2);
-        // PORTC |= _BV(PC2);
-        // PORTC &= _BV(PC2);
-        // _delay_ms(1000);
-        // SPI_MasterTransmit(value2);
-        // SPI_MasterTransmit(value2);
-        // PORTC |= _BV(PC2);
-        // PORTC &= _BV(PC2);
+        // led_exec();
 
         _delay_ms(1000);
 
