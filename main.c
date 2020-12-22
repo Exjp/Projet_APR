@@ -55,9 +55,16 @@ void SPI_MasterTransmit(char cData) {
 
 
 int count = 0;
+int tru_count = 0;
 
 ISR(TIMER0_OVF_vect) {
     count++;
+    if(count == 49){
+        tru_count++;
+        if(tru_count == 60)
+            tru_count = 0;
+        count = 0;
+    }
 }
 
 int main() {
@@ -71,9 +78,13 @@ int main() {
     TCCR0B = _BV(CS00) | _BV(CS02); //On va chercer le bit value de CS00 et CS02
     // TCCR0B = 0B00000101;
 
+
     // on active l'interruption du timer, on modifie le registre TIMSK0. On peut activer les modes WGM pour gérer la limite du registre
     TIMSK0 = (1<<TOIE0);
     // TIMSK0 = 0B00000001;
+
+    // TCCR0A = _BV(WGM00);
+    
     sei();
     
 
@@ -101,7 +112,7 @@ int main() {
 
         char buffer[32]; 
 
-        sprintf(buffer,"counter = %d",count);
+        sprintf(buffer,"counter = %d\n",tru_count);
 
         USART_Transmit_String(buffer);
 
