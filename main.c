@@ -115,28 +115,22 @@ void timer_interrupt(){
     TIMSK0 = (1<<TOIE0);
     // TIMSK0 = 0B00000001;
 
-    // TCCR0A = _BV(WGM00);
+    // TCCR0A = _BV(WGM00); //WGM
 }
 
 void magnet_init(){
-    // DDRD &= ~(1 << PIND2); //active la broche PD2 en mode input pour pouvoir lire l'état du capteur aimant
+    //active la broche PD2 en mode input pour pouvoir lire l'état du capteur aimant
 
-    DDRD = _BV(PIND2);
+    DDRD &= ~(1 << PD2);
 
     PCICR |= (1 << PCIE2);
-    //  PCICR = (1<<PCIE2);
-
-     // PCMSK0 = (1<<PCINT0);
-
 }
 
 void magnet_interrupt(){
 
-    // EIMSK = (1<<INT0);
-   
-    
     EIMSK |= (1 << INT0);
-
+    sei();
+    
 
 }
 
@@ -150,6 +144,7 @@ int main() {
     // timer_init();
     
     // led_init();
+
     
 
     
@@ -178,7 +173,5 @@ int main() {
         _delay_ms(1000);
 
 
-        //USART_Transmit_String("\n");
     }
 }
-//avrdude -p m328p -c arduino -P COM7 -U flash:w:a.bin
