@@ -121,10 +121,10 @@ void timer_interrupt(){
 void magnet_init(){
     // DDRD &= ~(1 << PIND2); //active la broche PD2 en mode input pour pouvoir lire l'état du capteur aimant
 
-    DDRD &= ~(1 << PIND2);
+    DDRD = _BV(PIND2);
 
     PCICR |= (1 << PCIE2);
-     // PCICR = (1<<PCIE2);
+    //  PCICR = (1<<PCIE2);
 
      // PCMSK0 = (1<<PCINT0);
 
