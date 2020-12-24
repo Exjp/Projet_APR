@@ -67,8 +67,12 @@ ISR(TIMER0_OVF_vect) {
     }
 }
 
-ISR(INT0_vect) {
-    count++;
+ISR(TIMER1_OVF_vect) {
+    tru_count++;
+}
+
+ISR(INT0_vect) { // interuption aimant
+    tru_count++;
 }
 
 void led_init(){
@@ -98,24 +102,31 @@ void led_exec(){
         PORTC &= _BV(PC2);
 }
 
-void timer_init(){
+void timer0_init(){
     // On active le timer
     // Dans le registre TCCR0B, on met à 1 les bits CS00 et CS02
     // TCCR0B = (1<<CS00) | (1<<CS02);
     TCCR0B = _BV(CS00) | _BV(CS02); //On va chercer le bit value de CS00 et CS02
     // TCCR0B = 0B00000101;
-
-    sei();
     
 }
 
-void timer_interrupt(){
+
+void timer0_interrupt(){
 
     // on active l'interruption du timer, on modifie le registre TIMSK0. On peut activer les modes WGM pour gérer la limite du registre
     TIMSK0 = (1<<TOIE0);
     // TIMSK0 = 0B00000001;
 
     // TCCR0A = _BV(WGM00); //WGM
+}
+void timer1_init(){
+    TCCR1B = _BV(CS10);
+}
+
+void timer1_interrupt(){
+
+     TIMSK1 = (1<<TOIE1);
 }
 
 void magnet_init(){
@@ -129,26 +140,30 @@ void magnet_init(){
 void magnet_interrupt(){
 
     EIMSK |= (1 << INT0);
-    sei();
+
     
 
 }
 
 int main() {
     USART_Init(MYUBRR); //initialisation de l'USART
-
-    magnet_init();
-    magnet_interrupt();
-
-    // timer_interrupt();
-    // timer_init();
-    
+    // magnet_init();
+    // timer0_init();
+    timer1_init();
     // led_init();
 
-    
+
+
+
+    // magnet_interrupt();
+
+    // timer0_interrupt();
+    timer1_interrupt();
 
     
 
+    
+    sei();
     while(1){
 
         // MAGNET
@@ -164,7 +179,7 @@ int main() {
 
         char buffer[32]; 
 
-        sprintf(buffer,"counter = %d\n",count);
+        sprintf(buffer,"counter = %d\n",tru_count);
 
         USART_Transmit_String(buffer);
 
