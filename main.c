@@ -33,11 +33,26 @@ unsigned char USART_Receive(void){
     return UDR0;
 }
 
-unsigned char USART_Receive2(void){
-    /* Wait for data to be received */
-    while (!(UCSR0A & (1<<RXC0)));
-    /* Get and return received data from buffer */
-    return UDR0;
+unsigned char* USART_Receive_String(void){
+    char buffer[32];
+    int cpt = 0;
+    char receive = USART_Receive();
+    while (receive != '\0'){
+      buffer[cpt] = receive;
+      cpt++;
+      receive = USART_Receive();
+    }
+
+    return buffer;
+}
+
+//Copy str1 in str2
+void copystr(char* str1, char* str2){
+  int cpt = 0;
+  while (str1[cpt] != '\0'){
+    str2[cpt] = str1[cpt];
+    cpt++;
+  }
 }
 
 void USART_Init(unsigned int ubrr){
@@ -118,7 +133,7 @@ void timer0_init(){
     // TCCR0B = (1<<CS00) | (1<<CS02);
     TCCR0B = _BV(CS00) | _BV(CS02); //On va chercer le bit value de CS00 et CS02
     // TCCR0B = 0B00000101;
-    
+
 }
 
 
@@ -151,7 +166,7 @@ void magnet_interrupt(){
 
     EIMSK |= (1 << INT0);
 
-    
+
 
 
 }
@@ -166,18 +181,18 @@ int main() {
 
     // timer_interrupt();
     // timer_init();
-    
+
     // led_init();
 
 
     // magnet_interrupt();
 
     // timer0_interrupt();
-    timer1_interrupt();
+    //timer1_interrupt();
 
-    
 
-    
+
+
     sei();
     while(1){
 
@@ -192,13 +207,17 @@ int main() {
         // USART_Transmit(send_back);
 
 
-        char buffer[32];
+        //char buffer[32];
 
-        sprintf(buffer,"counter = %d\n",tru_count);
+        //sprintf(buffer,"counter = %d\n",tru_count);
 
-        USART_Transmit_String(buffer);
+        //USART_Transmit_String(buffer);
 
         // led_exec();
+
+        char buffer[32];
+        copystr(USART_Receive_String(), buffer);
+        USART_Transmit_String(buffer);
 
         _delay_ms(1000);
 
