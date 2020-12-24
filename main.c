@@ -25,6 +25,7 @@ void USART_Transmit_String(char *s){
         cp += 1;
     }
 }
+
 unsigned char USART_Receive(void){
     /* Wait for data to be received */
     while (!(UCSR0A & (1<<RXC0)));
