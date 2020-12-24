@@ -1,12 +1,9 @@
 #include <avr/io.h>
 #include <util/delay.h>
-<<<<<<< HEAD
 #include <stddef.h>
-=======
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
->>>>>>> 1a23619170bde6cfe2d1a5c9cf9106df238d993c
 
 
 #define FOSC 13000000 // Clock Speed
@@ -35,6 +32,13 @@ unsigned char USART_Receive(void){
     return UDR0;
 }
 
+unsigned char USART_Receive2(void){
+    /* Wait for data to be received */
+    while (!(UCSR0A & (1<<RXC0)));
+    /* Get and return received data from buffer */
+    return UDR0;
+}
+
 void USART_Init(unsigned int ubrr){
     /*Set baud rate */
     UBRR0H = (unsigned char)(ubrr>>8);
@@ -46,23 +50,44 @@ void USART_Init(unsigned int ubrr){
     UCSR0C = (1<<USBS0)|(3<<UCSZ00);
 }
 
+void SPI_MasterInit(void){
+    DDRB = (1<<DDB3) | (1<<DDB5) | (1<<DDB2);
+    SPCR = (1<<SPE)|(1<<MSTR)|(1<<DDB5);
+}
+
+void SPI_MasterTransmit(char cData) {
+    SPDR = cData;
+    while(!(SPSR & (1<<SPIF))) {
+
+    }
+}
+
 int main() {
     // Active et allume la broche PB5 (led)
-    DDRD &= _BV(PD2);
-    int value;
+    //DDRD &= _BV(PD2);
+    SPI_MasterInit();
+    DDRB |= _BV(PB4);
+    DDRC |= _BV(PC1);
+    DDRC |= _BV(PC2);
+    DDRB |= _BV(PB2); // faut le mettre à 0, ça peut merder (histoire master/slave)s
+    int value1 = 0B00000000;
+    int value2 = 0B00000000;
+
+    int minute = 0;
+    int heure = 0;
+
     USART_Init(MYUBRR);
+
     while(1){
-        //USART_Transmit_String(" Nothing to see buds ");
+        SPI_MasterTransmit(value1);
+        SPI_MasterTransmit(value2);
+        PORTC |= _BV(PC2);
+        PORTC &= _BV(PC2);
+
         char receive = USART_Receive();
-        //if (receive == ''){
-        //  receive = 'm';
-        //}
-        //value = PIND;
-        //char res = value;
+
         char send_back = receive;
         USART_Transmit(send_back);
-        //_delay_ms(1);
-        //USART_Transmit_String("\n");
     }
 }
 //avrdude -p m328p -c arduino -P COM7 -U flash:w:a.bin
