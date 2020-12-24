@@ -2,7 +2,9 @@
 #include <util/delay.h>
 #include <stddef.h>
 #include<avr/interrupt.h>
-#include<stdio.h> 
+#include<stdio.h>
+#include<stdlib.h>
+#include<string.h>
 
 #define FOSC 13000000 // Clock Speed
 #define BAUD 38400
@@ -30,6 +32,13 @@ unsigned char USART_Receive(void){
     return UDR0;
 }
 
+unsigned char USART_Receive2(void){
+    /* Wait for data to be received */
+    while (!(UCSR0A & (1<<RXC0)));
+    /* Get and return received data from buffer */
+    return UDR0;
+}
+
 void USART_Init(unsigned int ubrr){
     /*Set baud rate */
     UBRR0H = (unsigned char)(ubrr>>8);
@@ -49,7 +58,7 @@ void SPI_MasterInit(void){
 void SPI_MasterTransmit(char cData) {
     SPDR = cData;
     while(!(SPSR & (1<<SPIF))) {
-        
+
     }
 }
 
@@ -83,14 +92,14 @@ void led_init(){
     DDRC |= _BV(PC1);
     DDRC |= _BV(PC2);
     DDRB |= _BV(PB2); // faut le mettre à 0, ça peut merder (histoire master/slave)s
-    
+
 
 }
 
 void led_exec(){
         int value1 = 0B00000001;
-        int value2 = 0B00000000; 
-        
+        int value2 = 0B00000000;
+
         SPI_MasterTransmit(value1);
         SPI_MasterTransmit(value2);
         PORTC |= _BV(PC2);
@@ -143,6 +152,7 @@ void magnet_interrupt(){
 
     
 
+
 }
 
 int main() {
@@ -153,6 +163,10 @@ int main() {
     // led_init();
 
 
+    // timer_interrupt();
+    // timer_init();
+    
+    // led_init();
 
 
     // magnet_interrupt();
@@ -169,7 +183,7 @@ int main() {
         // MAGNET
         //USART_Transmit_String(" Nothing to see buds ");
         //char s = USART_Receive();
- 
+
 
         // value = PIND; //Aimant: recupérer la veleur du capteur aimant
         // char res = value + '0'; //transformation de l'int en char
@@ -177,7 +191,7 @@ int main() {
         // USART_Transmit(send_back);
 
 
-        char buffer[32]; 
+        char buffer[32];
 
         sprintf(buffer,"counter = %d\n",tru_count);
 
