@@ -1,10 +1,10 @@
 #include <avr/io.h>
 #include <util/delay.h>
 #include <stddef.h>
+#include<avr/interrupt.h>
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
-
 
 #define FOSC 13000000 // Clock Speed
 #define BAUD 38400
@@ -62,32 +62,125 @@ void SPI_MasterTransmit(char cData) {
     }
 }
 
-int main() {
+
+int count = 0;
+int tru_count = 0;
+
+ISR(TIMER0_OVF_vect) {
+    count++;
+    if(count == 49){
+        tru_count++;
+        if(tru_count == 60)
+            tru_count = 0;
+        count = 0;
+    }
+}
+
+ISR(INT0_vect) {
+    count++;
+}
+
+void led_init(){
+
     // Active et allume la broche PB5 (led)
-    //DDRD &= _BV(PD2);
     SPI_MasterInit();
     DDRB |= _BV(PB4);
     DDRC |= _BV(PC1);
     DDRC |= _BV(PC2);
     DDRB |= _BV(PB2); // faut le mettre à 0, ça peut merder (histoire master/slave)s
-    int value1 = 0B00000000;
-    int value2 = 0B00000000;
 
-    int minute = 0;
-    int heure = 0;
 
-    USART_Init(MYUBRR);
+}
 
-    while(1){
+void led_exec(){
+        int value1 = 0B00000001;
+        int value2 = 0B00000000;
+
         SPI_MasterTransmit(value1);
         SPI_MasterTransmit(value2);
         PORTC |= _BV(PC2);
         PORTC &= _BV(PC2);
+        _delay_ms(1000);
+        SPI_MasterTransmit(value2);
+        SPI_MasterTransmit(value2);
+        PORTC |= _BV(PC2);
+        PORTC &= _BV(PC2);
+}
 
-        char receive = USART_Receive();
+void timer_init(){
+    // On active le timer
+    // Dans le registre TCCR0B, on met à 1 les bits CS00 et CS02
+    // TCCR0B = (1<<CS00) | (1<<CS02);
+    TCCR0B = _BV(CS00) | _BV(CS02); //On va chercer le bit value de CS00 et CS02
+    // TCCR0B = 0B00000101;
 
-        char send_back = receive;
-        USART_Transmit(send_back);
+    sei();
+
+}
+
+void timer_interrupt(){
+
+    // on active l'interruption du timer, on modifie le registre TIMSK0. On peut activer les modes WGM pour gérer la limite du registre
+    TIMSK0 = (1<<TOIE0);
+    // TIMSK0 = 0B00000001;
+
+    // TCCR0A = _BV(WGM00); //WGM
+}
+
+void magnet_init(){
+    //active la broche PD2 en mode input pour pouvoir lire l'état du capteur aimant
+
+    DDRD &= ~(1 << PD2);
+
+    PCICR |= (1 << PCIE2);
+}
+
+void magnet_interrupt(){
+
+    EIMSK |= (1 << INT0);
+    sei();
+
+
+}
+
+int main() {
+    USART_Init(MYUBRR); //initialisation de l'USART
+
+    magnet_init();
+    magnet_interrupt();
+
+    // timer_interrupt();
+    // timer_init();
+
+    // led_init();
+
+
+
+
+
+    while(1){
+
+        // MAGNET
+        //USART_Transmit_String(" Nothing to see buds ");
+        //char s = USART_Receive();
+
+
+        // value = PIND; //Aimant: recupérer la veleur du capteur aimant
+        // char res = value + '0'; //transformation de l'int en char
+        // char send_back = receive;
+        // USART_Transmit(send_back);
+
+
+        char buffer[32];
+
+        sprintf(buffer,"counter = %d\n",count);
+
+        USART_Transmit_String(buffer);
+
+        // led_exec();
+
+        _delay_ms(1000);
+
+
     }
 }
-//avrdude -p m328p -c arduino -P COM7 -U flash:w:a.bin
