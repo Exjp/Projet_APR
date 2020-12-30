@@ -11,7 +11,7 @@
 #define BAUD 38400
 #define MYUBRR FOSC/16/BAUD-1
 
-
+int BUFFER_HOUR_SIZE = 7;
 
 void USART_Transmit(char data){
     /* Wait for empty transmit buffer */
@@ -35,27 +35,38 @@ unsigned char USART_Receive(void){
     return UDR0;
 }
 
-void USART_Receive_String(char* buffer){
-    char receive = USART_Receive();
-    int cpt = 0;
-    while (receive != '\0'){
-      buffer[cpt] = receive;
-      cpt++;
-      receive = USART_Receive();
-    }
+void USART_Receive_String(char *buffer){
+    int cpt = -1;
+    do{
+        cpt++;
+        buffer[cpt] = USART_Receive();
+    } while (buffer[cpt] != '\0' && cpt < 32 - 1);
+    buffer[cpt] = '\0';
 }
 
-void USART_Receive_and_Transmit_String(){
-  char *buffer =  malloc(50);
-  char receive = USART_Receive();
-  int cpt = 0;
-  while (receive != '\0'){
-    buffer[cpt] = receive;
-    cpt++;
-    receive = USART_Receive();
-  }
-  USART_Transmit_String(buffer);
-  free(buffer);
+void USART_Receive_Hour(char **buffer){
+    int cpt = 0;
+    do{
+        (*buffer)[cpt] = USART_Receive();
+    } while ((*buffer)[cpt++] != '\n');
+}
+
+void USART_Transmit_Hour(char *buffer){
+    char *h = "Heure=";
+    char *m = "Minute=";
+    char h_value[4];
+    h_value[0] = buffer[0];
+    h_value[1] = buffer[1];
+    char m_value[4];
+    m_value[0] = buffer[3];
+    m_value[1] = buffer[4];
+    size_t fullsize = strlen(h) + 1 + strlen(m) + 1 + strlen(h_value) + 1 + strlen(m_value) + 1;
+    char * response = (char *) malloc(fullsize);
+    strcat(response, h);
+    strcat(response, h_value);
+    strcat(response, m);
+    strcat(response, m_value);
+    USART_Transmit_String(response);
 }
 
 //Copy str1 in str2
@@ -183,7 +194,6 @@ void magnet_interrupt(){
 
 }
 
-char* buffer;
 int main() {
     USART_Init(MYUBRR); //initialisation de l'USART
     // magnet_init();
@@ -205,6 +215,11 @@ int main() {
 
 
     char buffer[32];
+    char *buffer_hour = (char*)malloc(BUFFER_HOUR_SIZE * sizeof(char));
+    char hour[2];
+    char minute[2];
+
+
 
     sei();
     while(1){
@@ -228,10 +243,10 @@ int main() {
 
         // led_exec();
 
-        USART_Receive();
-        //copystr(test, buffer);
-        USART_Transmit_String(buffer);
-        //USART_Receive_and_Transmit_String();
-        _delay_ms(1000);
+        USART_Receive_Hour(&buffer_hour);
+        USART_Transmit_Hour(buffer_hour);
+
+        //_delay_ms(1000);
     }
+    free(buffer_hour);
 }
