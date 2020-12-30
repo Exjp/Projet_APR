@@ -1,10 +1,11 @@
 #include <avr/io.h>
 #include <util/delay.h>
 #include <stddef.h>
-#include<avr/interrupt.h>
-#include<stdio.h>
-#include<stdlib.h>
-#include<string.h>
+#include <avr/interrupt.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdbool.h>
 
 #define FOSC 13000000 // Clock Speed
 #define BAUD 38400
@@ -33,17 +34,28 @@ unsigned char USART_Receive(void){
     return UDR0;
 }
 
-unsigned char* USART_Receive_String(void){
-    char buffer[32];
-    int cpt = 0;
+void USART_Receive_String(char* buffer){
     char receive = USART_Receive();
+    int cpt = 0;
     while (receive != '\0'){
       buffer[cpt] = receive;
       cpt++;
       receive = USART_Receive();
-    }
 
-    return buffer;
+    }
+}
+
+void USART_Receive_and_Transmit_String(){
+  char *buffer =  malloc(50);
+  char receive = USART_Receive();
+  int cpt = 0;
+  while (receive != '\0'){
+    buffer[cpt] = receive;
+    cpt++;
+    receive = USART_Receive();
+  }
+  USART_Transmit_String(buffer);
+  free(buffer);
 }
 
 //Copy str1 in str2
@@ -171,6 +183,7 @@ void magnet_interrupt(){
 
 }
 
+char* buffer;
 int main() {
     USART_Init(MYUBRR); //initialisation de l'USART
     // magnet_init();
@@ -191,8 +204,7 @@ int main() {
     //timer1_interrupt();
 
 
-
-
+    char buffer[32];
     sei();
     while(1){
 
@@ -215,12 +227,10 @@ int main() {
 
         // led_exec();
 
-        char buffer[32];
-        copystr(USART_Receive_String(), buffer);
+        USART_Receive_String(buffer);
+        //copystr(test, buffer);
         USART_Transmit_String(buffer);
-
+        //USART_Receive_and_Transmit_String();
         _delay_ms(1000);
-
-
     }
 }
