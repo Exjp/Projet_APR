@@ -12,6 +12,7 @@
 #define MYUBRR FOSC/16/BAUD-1
 
 
+
 void USART_Transmit(char data){
     /* Wait for empty transmit buffer */
     while ( !( UCSR0A & (1<<UDRE0)));
@@ -41,7 +42,6 @@ void USART_Receive_String(char* buffer){
       buffer[cpt] = receive;
       cpt++;
       receive = USART_Receive();
-
     }
 }
 
@@ -205,6 +205,7 @@ int main() {
 
 
     char buffer[32];
+
     sei();
     while(1){
 
@@ -227,7 +228,7 @@ int main() {
 
         // led_exec();
 
-        USART_Receive_String(buffer);
+        USART_Receive();
         //copystr(test, buffer);
         USART_Transmit_String(buffer);
         //USART_Receive_and_Transmit_String();
