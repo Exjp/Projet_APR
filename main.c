@@ -35,27 +35,14 @@ unsigned char USART_Receive(void){
 }
 
 void USART_Receive_String(char* buffer){
-    char receive = USART_Receive();
-    int cpt = 0;
-    while (receive != '\0'){
-      buffer[cpt] = receive;
-      cpt++;
-      receive = USART_Receive();
-
-    }
-}
-
-void USART_Receive_and_Transmit_String(){
-  char *buffer =  malloc(50);
-  char receive = USART_Receive();
-  int cpt = 0;
-  while (receive != '\0'){
-    buffer[cpt] = receive;
-    cpt++;
-    receive = USART_Receive();
-  }
-  USART_Transmit_String(buffer);
-  free(buffer);
+    int cpt = -1;
+    do{
+        cpt++;
+        buffer[cpt] = USART_Receive();
+        USART_Transmit(buffer[cpt]);
+    } while (buffer[cpt] != '\0' && cpt < 32 - 1);
+    buffer[cpt] = '\0';
+    
 }
 
 //Copy str1 in str2
@@ -230,7 +217,6 @@ int main() {
         USART_Receive_String(buffer);
         //copystr(test, buffer);
         USART_Transmit_String(buffer);
-        //USART_Receive_and_Transmit_String();
         _delay_ms(1000);
     }
 }
