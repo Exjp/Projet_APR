@@ -11,6 +11,76 @@
 #define MYUBRR FOSC/16/BAUD-1
 
 
+int count = 0;
+int timer0_count = 0;
+int timer1_count = 0;
+int revolution_Time = 0;
+
+int next_Column = 0;
+int size_Column = 0;
+int diplay_Tab[120] = {
+    0B00000001,0B00000000,
+    0B00000001,0B00000000,
+    0B00000001,0B00000000,
+    0B00000001,0B00000000,
+    0B00000001,0B00000000,
+    0B00000001,0B00000000,
+    0B00000001,0B00000000,
+    0B00000001,0B00000000,
+    0B00000001,0B00000000,
+    0B00000001,0B00000000,
+    0B00000001,0B00000000,
+    0B00000001,0B00000000,
+    0B00000001,0B00000000,
+    0B00000001,0B00000000,
+    0B00000001,0B00000000,
+    0B00000001,0B00000000,
+    0B00000001,0B00000000,
+    0B00000001,0B00000000,
+    0B00000001,0B00000000,
+    0B00000001,0B00000000,
+    0B00000001,0B00000000,
+    0B00000001,0B00000000,
+    0B00000001,0B00000000,
+    0B00000001,0B00000000,
+    0B00000001,0B00000000,
+    0B00000001,0B00000000,
+    0B00000001,0B00000000,
+    0B00000001,0B00000000,
+    0B00000001,0B00000000,
+    0B00000001,0B00000000,
+    0B00000001,0B00000000,
+    0B00000001,0B00000000,
+    0B00000001,0B00000000,
+    0B00000001,0B00000000,
+    0B00000001,0B00000000,
+    0B00000001,0B00000000,
+    0B00000001,0B00000000,
+    0B00000001,0B00000000,
+    0B00000001,0B00000000,
+    0B00000001,0B00000000,
+    0B00000001,0B00000000,
+    0B00000001,0B00000000,
+    0B00000001,0B00000000,
+    0B00000001,0B00000000,
+    0B00000001,0B00000000,
+    0B00000001,0B00000000,
+    0B00000001,0B00000000,
+    0B00000001,0B00000000,
+    0B00000001,0B00000000,
+    0B00000001,0B00000000,
+    0B00000001,0B00000000,
+    0B00000001,0B00000000,
+    0B00000001,0B00000000,
+    0B00000001,0B00000000,
+    0B00000001,0B00000000,
+    0B00000001,0B00000000,
+    0B00000001,0B00000000,
+    0B00000001,0B00000000,
+    0B00000001,0B00000000,
+    0B00000001,0B00000000
+};
+
 void USART_Transmit(char data){
     /* Wait for empty transmit buffer */
     while ( !( UCSR0A & (1<<UDRE0)));
@@ -62,28 +132,6 @@ void SPI_MasterTransmit(char cData) {
     }
 }
 
-
-int count = 0;
-int tru_count = 0;
-
-ISR(TIMER0_OVF_vect) {
-    count++;
-    if(count == 49){
-        tru_count++;
-        if(tru_count == 60)
-            tru_count = 0;
-        count = 0;
-    }
-}
-
-ISR(TIMER1_OVF_vect) {
-    tru_count++;
-}
-
-ISR(INT0_vect) { // interuption aimant
-    tru_count++;
-}
-
 void led_init(){
 
     // Active et allume la broche PB5 (led)
@@ -96,20 +144,6 @@ void led_init(){
 
 }
 
-void led_exec(){
-        int value1 = 0B00000001;
-        int value2 = 0B00000000;
-
-        SPI_MasterTransmit(value1);
-        SPI_MasterTransmit(value2);
-        PORTC |= _BV(PC2);
-        PORTC &= _BV(PC2);
-        _delay_ms(1000);
-        SPI_MasterTransmit(value2);
-        SPI_MasterTransmit(value2);
-        PORTC |= _BV(PC2);
-        PORTC &= _BV(PC2);
-}
 
 void timer0_init(){
     // On active le timer
@@ -130,13 +164,19 @@ void timer0_interrupt(){
     // TCCR0A = _BV(WGM00); //WGM
 }
 void timer1_init(){
-    TCCR1B = _BV(CS10);
+    // /1 prescale + on init en plus OCR1A 
+    TCCR1B = _BV(CS10) | (1 << WGM12);
+    // A testé si ça marche pas
+    // TCCR1B = _BV(CS10) | (1 << WGM13) | (1 << WGM10);
+    // TCCR1B = _BV(CS10) | (1 << WGM13) | (1 << WGM11) | (1 << WGM10);
+    // TCCR1B = _BV(CS10) | (1 << WGM13) | (1 << WGM12) | (1 << WGM11) | (1 << WGM10);
 }
 
 void timer1_interrupt(){
 
-     TIMSK1 = (1<<TOIE1);
+     TIMSK1 = (1<<OCIE1A) | (1 <<  TOIE1); // + init interrupt compare register OCR1A
 }
+
 
 void magnet_init(){
     //active la broche PD2 en mode input pour pouvoir lire l'état du capteur aimant
@@ -146,44 +186,86 @@ void magnet_init(){
     PCICR |= (1 << PCIE2);
 }
 
-void magnet_interrupt(){
-
+void magnet_interrupt(){ 
     EIMSK |= (1 << INT0);
+}
 
-    
+
+void led_exec(){
+        // int value1 = 0B00000001;
+        // int value2 = 0B00000000;
+
+        int value1 = diplay_Tab[next_Column];
+        int value2 = diplay_Tab[next_Column + 1];
+        SPI_MasterTransmit(value1);
+        SPI_MasterTransmit(value2);
+        PORTC |= _BV(PC2);
+        PORTC &= _BV(PC2);
 
 
+        // _delay_ms(1000);
+        // SPI_MasterTransmit(value2);
+        // SPI_MasterTransmit(value2);
+        // PORTC |= _BV(PC2);
+        // PORTC &= _BV(PC2);
+}
+
+ISR(TIMER0_OVF_vect) {
+    count++;
+    if(count == 49){
+        timer0_count++;
+        if(timer0_count == 60)
+            timer0_count = 0;
+        count = 0;
+    }
+}
+
+
+ISR(TIMER1_OVF_vect) {
+    timer1_count++;
+}
+
+ISR(INT0_vect) { // interuption aimant
+    revolution_Time = timer1_count;
+    size_Column = revolution_Time / 60;
+    TCNT1 = 0;
+    timer1_count = 0;
+    next_Column = 0;
+    OCR1A = size_Column - 1;
+
+    led_exec();
+    // reset le tableau d'affichage des leds
+}
+
+
+
+ISR(TIMER1_CAPT_vect) { // interruption comparaison
+    OCR1A = TCNT1 + revolution_Time - 1;
+    next_Column = next_Column + 2;
+    led_exec();
+    // update position du pointeur du tableau d'affichage
 }
 
 int main() {
     USART_Init(MYUBRR); //initialisation de l'USART
-    // magnet_init();
-    // timer0_init();
+    magnet_init();
+    timer0_init();
     timer1_init();
-    // led_init();
+    led_init();
 
-
-    // timer_interrupt();
-    // timer_init();
-    
-    // led_init();
-
-
-    // magnet_interrupt();
-
-    // timer0_interrupt();
+    _delay_ms(3000); // Laissez le temps au truc de se lancer
+    timer0_interrupt();
     timer1_interrupt();
-
-    
+    magnet_interrupt();
 
     
     sei();
     while(1){
-
+        
+        
         // MAGNET
         //USART_Transmit_String(" Nothing to see buds ");
         //char s = USART_Receive();
-
 
         // value = PIND; //Aimant: recupérer la veleur du capteur aimant
         // char res = value + '0'; //transformation de l'int en char
@@ -193,7 +275,7 @@ int main() {
 
         char buffer[32];
 
-        sprintf(buffer,"counter = %d\n",tru_count);
+        sprintf(buffer,"counter = %d\n",timer1_count);
 
         USART_Transmit_String(buffer);
 
