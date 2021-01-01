@@ -1,15 +1,17 @@
 #include <avr/io.h>
 #include <util/delay.h>
 #include <stddef.h>
-#include<avr/interrupt.h>
-#include<stdio.h>
-#include<stdlib.h>
-#include<string.h>
+#include <avr/interrupt.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdbool.h>
 
 #define FOSC 13000000 // Clock Speed
 #define BAUD 38400
 #define MYUBRR FOSC/16/BAUD-1
 
+int BUFFER_HOUR_SIZE = 7;
 
 int count = 0;
 int timer0_count = 0;
@@ -95,6 +97,7 @@ void USART_Transmit_String(char *s){
         cp += 1;
     }
 }
+
 unsigned char USART_Receive(void){
     /* Wait for data to be received */
     while (!(UCSR0A & (1<<RXC0)));
@@ -102,11 +105,47 @@ unsigned char USART_Receive(void){
     return UDR0;
 }
 
-unsigned char USART_Receive2(void){
-    /* Wait for data to be received */
-    while (!(UCSR0A & (1<<RXC0)));
-    /* Get and return received data from buffer */
-    return UDR0;
+void USART_Receive_String(char *buffer){
+    int cpt = -1;
+    do{
+        cpt++;
+        buffer[cpt] = USART_Receive();
+    } while (buffer[cpt] != '\0' && cpt < 32 - 1);
+    buffer[cpt] = '\0';
+}
+
+void USART_Receive_Hour(char **buffer){
+    int cpt = 0;
+    do{
+        (*buffer)[cpt] = USART_Receive();
+    } while ((*buffer)[cpt++] != '\n');
+}
+
+void USART_Transmit_Hour(char *buffer){
+    char *h = "Heure=";
+    char *m = "Minute=";
+    char h_value[4];
+    h_value[0] = buffer[0];
+    h_value[1] = buffer[1];
+    char m_value[4];
+    m_value[0] = buffer[3];
+    m_value[1] = buffer[4];
+    size_t fullsize = strlen(h) + 1 + strlen(m) + 1 + strlen(h_value) + 1 + strlen(m_value) + 1;
+    char * response = (char *) malloc(fullsize);
+    strcat(response, h);
+    strcat(response, h_value);
+    strcat(response, m);
+    strcat(response, m_value);
+    USART_Transmit_String(response);
+}
+
+//Copy str1 in str2
+void copystr(char* str1, char* str2){
+  int cpt = 0;
+  while (str1[cpt] != '\0'){
+    str2[cpt] = str1[cpt];
+    cpt++;
+  }
 }
 
 void USART_Init(unsigned int ubrr){
@@ -151,7 +190,7 @@ void timer0_init(){
     // TCCR0B = (1<<CS00) | (1<<CS02);
     TCCR0B = _BV(CS00) | _BV(CS02); //On va chercer le bit value de CS00 et CS02
     // TCCR0B = 0B00000101;
-    
+
 }
 
 
@@ -258,7 +297,14 @@ int main() {
     timer1_interrupt();
     magnet_interrupt();
 
-    
+
+    char buffer[32];
+    char *buffer_hour = (char*)malloc(BUFFER_HOUR_SIZE * sizeof(char));
+    char hour[2];
+    char minute[2];
+
+
+
     sei();
     while(1){
         
@@ -273,16 +319,18 @@ int main() {
         // USART_Transmit(send_back);
 
 
-        char buffer[32];
+        //char buffer[32];
 
         sprintf(buffer,"counter = %d\n",timer1_count);
 
-        USART_Transmit_String(buffer);
+        //USART_Transmit_String(buffer);
 
         // led_exec();
 
-        _delay_ms(1000);
+        USART_Receive_Hour(&buffer_hour);
+        USART_Transmit_Hour(buffer_hour);
 
-
+        //_delay_ms(1000);
     }
+    free(buffer_hour);
 }
