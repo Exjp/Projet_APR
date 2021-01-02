@@ -335,26 +335,12 @@ int main() {
 
     sei();
     while(1){
-        
-        
-        // MAGNET
-        //USART_Transmit_String(" Nothing to see buds ");
-        //char s = USART_Receive();
 
-        // value = PIND; //Aimant: recupérer la veleur du capteur aimant
-        // char res = value + '0'; //transformation de l'int en char
-        // char send_back = receive;
-        // USART_Transmit(send_back);
-
-
-        //char buffer[32];
+        char buffer[32];
 
         sprintf(buffer,"counter = %d\n",timer1_count);
 
-        //USART_Transmit_String(buffer);
-
-        // led_exec();
-
+        USART_Transmit_String(buffer);
 
         if (!receive){
           USART_Receive_String(&buffer_hour);
