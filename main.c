@@ -83,6 +83,12 @@ int diplay_Tab[120] = {
     0B00000001,0B00000000
 };
 
+
+int hour = 0;
+int *addr_hour = &hour;
+int minute = 0;
+int *addr_minute = &minute;
+
 void USART_Transmit(char data){
     /* Wait for empty transmit buffer */
     while ( !( UCSR0A & (1<<UDRE0)));
@@ -326,8 +332,7 @@ int main() {
     char buffer[32];
     char *buffer_hour = (char*)malloc(BUFFER_HOUR_SIZE * sizeof(char));
     //int* hour = (int*) malloc(4 * sizeof(int));
-    int hour = 0;
-    int *addr_hour = &hour;
+
 
     bool receive = false;
     bool modify = true;
