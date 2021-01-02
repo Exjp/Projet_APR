@@ -13,6 +13,11 @@
 
 int BUFFER_HOUR_SIZE = 7;
 
+int hour = 0;
+int *addr_hour = &hour;
+int minute = 0;
+int *addr_minute = &minute;
+
 void USART_Transmit(char data){
     /* Wait for empty transmit buffer */
     while ( !( UCSR0A & (1<<UDRE0)));
@@ -42,39 +47,56 @@ void USART_Receive_String(char **buffer){
     } while ((*buffer)[cpt++] != '\n');
 }
 
-void USART_Transmit_Hour(int *addr_hour){
+void USART_Transmit_Hour(){
     char buffer[32];
-    char bufferTmp[32];
-    sprintf(bufferTmp,"%d",*addr_hour);
+    char bufferTmpHour[32];
+    char bufferTmpMinute[32];
+    sprintf(bufferTmpHour,"%d",*addr_hour);
+    sprintf(bufferTmpMinute,"%d",*addr_minute);
 
-    if ((*addr_hour) < 10){
+    if ((*addr_hour) == 0 && (*addr_minute) < 10){
       buffer[0] = '0';
       buffer[1] = '0';
       buffer[2] = '0';
-      buffer[3] = bufferTmp[0];
+      buffer[3] = bufferTmpMinute[0];
     }
-    else if ((*addr_hour) < 100){
+    else if ((*addr_hour) == 0 && (*addr_minute) >= 10){
       buffer[0] = '0';
       buffer[1] = '0';
-      buffer[2] = bufferTmp[0];
-      buffer[3] = bufferTmp[1];
+      buffer[2] = bufferTmpMinute[0];
+      buffer[3] = bufferTmpMinute[1];
     }
-    else if ((*addr_hour) < 1000){
+    else if ((*addr_hour) < 10 && (*addr_minute) < 10){
       buffer[0] = '0';
-      buffer[1] = bufferTmp[0];
-      buffer[2] = bufferTmp[1];
-      buffer[3] = bufferTmp[2];
+      buffer[1] = bufferTmpHour[0];
+      buffer[2] = '0';
+      buffer[3] = bufferTmpMinute[0];
     }
-    else{
-      strcpy(buffer, bufferTmp);
+    else if ((*addr_hour) < 10 && (*addr_minute) >= 10){
+      buffer[0] = '0';
+      buffer[1] = bufferTmpHour[0];
+      buffer[2] = bufferTmpMinute[0];
+      buffer[3] = bufferTmpMinute[1];
+    }
+    else if ((*addr_hour) >= 10 && (*addr_minute) < 10){
+      buffer[0] = bufferTmpHour[0];
+      buffer[1] = bufferTmpHour[1];
+      buffer[2] = '0';
+      buffer[3] = bufferTmpMinute[0];
+    }
+    else {
+      buffer[0] = bufferTmpHour[0];
+      buffer[1] = bufferTmpHour[1];
+      buffer[2] = bufferTmpMinute[0];
+      buffer[3] = bufferTmpMinute[1];
     }
 
     char *inter = " : ";
     char *end = " \n";
-    char h_value[6];
+    char h_value[10];
     h_value[0] = buffer[0];
     h_value[1] = buffer[1];
-    char m_value[6];
+    char m_value[10];
     m_value[0] = buffer[2];
     m_value[1] = buffer[3];
     size_t fullsize = strlen(h_value) + 1 + strlen(m_value) + 1 + strlen(inter) + 1 + strlen(end) + 1;
@@ -86,21 +108,29 @@ void USART_Transmit_Hour(int *addr_hour){
     USART_Transmit_String(response);
 }
 
-void buffer_hour_increment(int *addr_hour, int cpt){
-  (*addr_hour)++;
+void buffer_hour_increment(int cpt){
+  (*addr_minute)++;
 
-  if ((*addr_hour) == 2360){
+  if ((*addr_minute) == 60){
+    (*addr_hour)++;
+    (*addr_minute) = 0;
+  }
+
+  if ((*addr_hour) == 24){
     (*addr_hour) = 0;
   }
 
-  else if (((*addr_hour) - 60)%100 == 0){
-    (*addr_hour) += 40;
-  }
 
 }
 
-void fill_hour(char* buffer, int *addr_hour){
-  *addr_hour = atoi(buffer);
+void fill_hour(char* buffer){
+  char buffer_tmp[5];
+  buffer_tmp[0] = buffer[0];
+  buffer_tmp[1] = buffer[1];
+  *addr_hour = atoi(buffer_tmp);
+  buffer_tmp[0] = buffer[2];
+  buffer_tmp[1] = buffer[3];
+  *addr_minute = atoi(buffer_tmp);
 }
 
 void USART_Init(unsigned int ubrr){
@@ -238,8 +268,7 @@ int main() {
     char buffer[32];
     char *buffer_hour = (char*)malloc(BUFFER_HOUR_SIZE * sizeof(char));
     //int* hour = (int*) malloc(4 * sizeof(int));
-    int hour = 0;
-    int *addr_hour = &hour;
+
 
     bool receive = false;
     bool modify = true;
@@ -270,13 +299,13 @@ int main() {
 
         if (!receive){
           USART_Receive_String(&buffer_hour);
-          fill_hour(buffer_hour, addr_hour);
+          fill_hour(buffer_hour);
           receive = true;
         }
 
         if (tru_count == 0 && modify){
-          buffer_hour_increment(addr_hour, tru_count);
-          USART_Transmit_Hour(addr_hour);
+          USART_Transmit_Hour();
+          buffer_hour_increment(tru_count);
           modify = false;
         }
         if (tru_count == 1 && !modify){
