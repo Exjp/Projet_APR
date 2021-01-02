@@ -105,47 +105,72 @@ unsigned char USART_Receive(void){
     return UDR0;
 }
 
-void USART_Receive_String(char *buffer){
-    int cpt = -1;
-    do{
-        cpt++;
-        buffer[cpt] = USART_Receive();
-    } while (buffer[cpt] != '\0' && cpt < 32 - 1);
-    buffer[cpt] = '\0';
-}
-
-void USART_Receive_Hour(char **buffer){
+void USART_Receive_String(char **buffer){
     int cpt = 0;
     do{
         (*buffer)[cpt] = USART_Receive();
     } while ((*buffer)[cpt++] != '\n');
 }
 
-void USART_Transmit_Hour(char *buffer){
-    char *h = "Heure=";
-    char *m = "Minute=";
-    char h_value[4];
+void USART_Transmit_Hour(int *addr_hour){
+    char buffer[32];
+    char bufferTmp[32];
+    sprintf(bufferTmp,"%d",*addr_hour);
+
+    if ((*addr_hour) < 10){
+      buffer[0] = '0';
+      buffer[1] = '0';
+      buffer[2] = '0';
+      buffer[3] = bufferTmp[0];
+    }
+    else if ((*addr_hour) < 100){
+      buffer[0] = '0';
+      buffer[1] = '0';
+      buffer[2] = bufferTmp[0];
+      buffer[3] = bufferTmp[1];
+    }
+    else if ((*addr_hour) < 1000){
+      buffer[0] = '0';
+      buffer[1] = bufferTmp[0];
+      buffer[2] = bufferTmp[1];
+      buffer[3] = bufferTmp[2];
+    }
+    else{
+      strcpy(buffer, bufferTmp);
+    }
+
+    char *inter = " : ";
+    char *end = " \n";
+    char h_value[6];
     h_value[0] = buffer[0];
     h_value[1] = buffer[1];
-    char m_value[4];
-    m_value[0] = buffer[3];
-    m_value[1] = buffer[4];
-    size_t fullsize = strlen(h) + 1 + strlen(m) + 1 + strlen(h_value) + 1 + strlen(m_value) + 1;
+    char m_value[6];
+    m_value[0] = buffer[2];
+    m_value[1] = buffer[3];
+    size_t fullsize = strlen(h_value) + 1 + strlen(m_value) + 1 + strlen(inter) + 1 + strlen(end) + 1;
     char * response = (char *) malloc(fullsize);
-    strcat(response, h);
     strcat(response, h_value);
-    strcat(response, m);
+    strcat(response, inter);
     strcat(response, m_value);
+    strcat(response, end);
     USART_Transmit_String(response);
 }
 
-//Copy str1 in str2
-void copystr(char* str1, char* str2){
-  int cpt = 0;
-  while (str1[cpt] != '\0'){
-    str2[cpt] = str1[cpt];
-    cpt++;
+void buffer_hour_increment(int *addr_hour, int cpt){
+  (*addr_hour)++;
+
+  if ((*addr_hour) == 2360){
+    (*addr_hour) = 0;
   }
+
+  else if (((*addr_hour) - 60)%100 == 0){
+    (*addr_hour) += 40;
+  }
+
+}
+
+void fill_hour(char* buffer, int *addr_hour){
+  *addr_hour = atoi(buffer);
 }
 
 void USART_Init(unsigned int ubrr){
@@ -300,10 +325,13 @@ int main() {
 
     char buffer[32];
     char *buffer_hour = (char*)malloc(BUFFER_HOUR_SIZE * sizeof(char));
-    char hour[2];
-    char minute[2];
+    //int* hour = (int*) malloc(4 * sizeof(int));
+    int hour = 0;
+    int *addr_hour = &hour;
 
-
+    bool receive = false;
+    bool modify = true;
+    char trash[32];
 
     sei();
     while(1){
@@ -327,10 +355,21 @@ int main() {
 
         // led_exec();
 
-        USART_Receive_Hour(&buffer_hour);
-        USART_Transmit_Hour(buffer_hour);
 
-        //_delay_ms(1000);
+        if (!receive){
+          USART_Receive_String(&buffer_hour);
+          fill_hour(buffer_hour, addr_hour);
+          receive = true;
+        }
+
+        if (tru_count == 0 && modify){
+          buffer_hour_increment(addr_hour, tru_count);
+          USART_Transmit_Hour(addr_hour);
+          modify = false;
+        }
+        if (tru_count == 1 && !modify){
+          modify = true;
+        }
     }
     free(buffer_hour);
 }
