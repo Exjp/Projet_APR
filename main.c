@@ -11,79 +11,140 @@
 #define BAUD 38400
 #define MYUBRR FOSC/16/BAUD-1
 
-int BUFFER_HOUR_SIZE = 7;
-
-int count = 0;
-int timer0_count = 0;
-int timer1_count = 0;
-int revolution_Time = 0;
-
-int next_Column = 0;
-int size_Column = 0;
-int diplay_Tab[120] = {
+volatile int BUFFER_HOUR_SIZE = 7;
+volatile int count = 0;
+volatile int timer0_count = 0;
+volatile int timer1_count = 0;
+volatile int revolution_Time = 0;
+volatile int next_Column = 0;
+volatile int size_Column = 0;
+/* Display tap initial
+volatile int diplay_Tab[120] = {
+    0B00000001,0B00000000,     // T
+    0B00011111,0B00000000,
     0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000
+    0B00000000,0B00000000,
+    0B00011111,0B00000000,     // E
+    0B00010101,0B00000000,
+    0B00010101,0B00000000,
+    0B00000000,0B00000000,
+    0B00011111,0B00000000,     // C
+    0B00010001,0B00000000,
+    0B00010001,0B00000000,
+    0B00000000,0B00000000,
+    0B00011111,0B00000000,     // H
+    0B00000100,0B00000000,
+    0B00011111,0B00000000,
+    0B00000000,0B00000000,
+    0B00010111,0B00000000,     // y
+    0B00010100,0B00000000,
+    0B00011111,0B00000000,
+    0B00000000,0B00000000,
+    0B00011111,0B00000000,     // D
+    0B00010001,0B00000000,
+    0B00001110,0B00000000,
+    0B00000000,0B00000000,
+    0B00011111,0B00000000,     // I
+    0B00000000,0B00000000,
+    0B00010111,0B00000000,     // Y
+    0B00010100,0B00000000,
+    0B00011111,0B00000000,
+    0B00100001,0B00000000,
+    0B01000001,0B00000000,
+    0B01000001,0B00000000,
+    0B01000001,0B00000000,
+    0B01000001,0B00000000,
+    0B01000001,0B00000000,
+    0B00100001,0B00000000,
+    0B00100001,0B00000000,
+    0B00100001,0B00000000,
+    0B00100001,0B10000000,
+    0B00100001,0B10000000,
+    0B00000001,0B10000000,
+    0B00000001,0B10000000,
+    0B00000001,0B10000000,
+    0B00000001,0B01000000,
+    0B00000001,0B01000000,
+    0B00000001,0B01000000,
+    0B00000001,0B01000000,
+    0B00000001,0B01000000,
+    0B00000001,0B00100000,
+    0B00000001,0B00100000,
+    0B00000001,0B00100000,
+    0B00000001,0B00100000,
+    0B00000001,0B00100000,
+    0B00000001,0B00010000,
+    0B00000001,0B00010000,
+    0B00000001,0B00010000,
+    0B00000001,0B00010000,
+    0B00000001,0B00010000,
+    0B00000001,0B00001000,
+    0B00000001,0B00000100
 };
+*/
 
-
+volatile int diplay_Tab[120] = {
+    0B00000000,0B00000001,
+    0B00000000,0B00000001,
+    0B00000000,0B00000001,
+    0B00000000,0B00000001,
+    0B00000000,0B00000001,
+    0B00000000,0B00000001,
+    0B00000000,0B00000001,
+    0B00000000,0B00000001,
+    0B00000000,0B00000001,
+    0B00000000,0B00000001,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000
+};
 int hour = 0;
 int *addr_hour = &hour;
 int minute = 0;
@@ -233,10 +294,7 @@ void led_init(){
     DDRC |= _BV(PC1);
     DDRC |= _BV(PC2);
     DDRB |= _BV(PB2); // faut le mettre à 0, ça peut merder (histoire master/slave)s
-
-
 }
-
 
 void timer0_init(){
     // On active le timer
@@ -247,7 +305,6 @@ void timer0_init(){
 
 }
 
-
 void timer0_interrupt(){
 
     // on active l'interruption du timer, on modifie le registre TIMSK0. On peut activer les modes WGM pour gérer la limite du registre
@@ -256,20 +313,27 @@ void timer0_interrupt(){
 
     // TCCR0A = _BV(WGM00); //WGM
 }
+
 void timer1_init(){
+    // OCR1AL = 0B00011111;
+    // OCR1AH = 0B00011110;
+    OCR1A=0xFFFE;
+    TCNT1 = 0;
+    TCCR1A = 0;
+    TCCR1B = 0;
     // /1 prescale + on init en plus OCR1A
-    TCCR1B = _BV(CS10) | (1 << WGM12);
-    // A testé si ça marche pas
-    // TCCR1B = _BV(CS10) | (1 << WGM13) | (1 << WGM10);
-    // TCCR1B = _BV(CS10) | (1 << WGM13) | (1 << WGM11) | (1 << WGM10);
-    // TCCR1B = _BV(CS10) | (1 << WGM13) | (1 << WGM12) | (1 << WGM11) | (1 << WGM10);
+    TCCR1B = _BV(CS10);
+    // TCCR1B = _BV(CS12) ;
+    TIMSK1 = (1<<OCIE1A) | (1 << TOIE1);
+    // TIMSK1 = (1 << TOIE1);
+    // USART_Transmit('p');
 }
 
 void timer1_interrupt(){
 
-     TIMSK1 = (1<<OCIE1A) | (1 <<  TOIE1); // + init interrupt compare register OCR1A
+    //  USART_Transmit('z');
+     // + init interrupt compare register OCR1A
 }
-
 
 void magnet_init(){
     //active la broche PD2 en mode input pour pouvoir lire l'état du capteur aimant
@@ -282,7 +346,6 @@ void magnet_init(){
 void magnet_interrupt(){
     EIMSK |= (1 << INT0);
 }
-
 
 void led_exec(){
         // int value1 = 0B00000001;
@@ -303,6 +366,21 @@ void led_exec(){
         // PORTC &= _BV(PC2);
 }
 
+void udapte_display() {
+    for(int i = 0; i < 120; i = i + 2) {
+        diplay_Tab[i] = 0;
+        diplay_Tab[i+1] = 0;
+    }
+
+    // int pos_hour = ((hour / 60) * 3) - 1;
+    // int pos_min = ((min / 60)) * 3) - 1;
+
+    // diplay_Tab[pos_hour] = 1;
+    // diplay_Tab[pos_min] = 1;
+    // diplay_Tab[pos_min + 1] = 1;
+
+}
+
 ISR(TIMER0_OVF_vect) {
     count++;
     if(count == 49){
@@ -312,7 +390,6 @@ ISR(TIMER0_OVF_vect) {
         count = 0;
     }
 }
-
 
 ISR(TIMER1_OVF_vect) {
     timer1_count++;
@@ -326,15 +403,15 @@ ISR(INT0_vect) { // interuption aimant
     next_Column = 0;
     OCR1A = size_Column - 1;
 
-    led_exec();
+    // update_display();d
+    // led_exec();
     // reset le tableau d'affichage des leds
 }
 
-
-
-ISR(TIMER1_CAPT_vect) { // interruption comparaison
+ISR(TIMER1_COMPA_vect) { // interruption comparaison
     OCR1A = TCNT1 + size_Column - 1;
     next_Column = next_Column + 2;
+
     led_exec();
     // update position du pointeur du tableau d'affichage
 }
@@ -348,14 +425,19 @@ int main() {
 
     //_delay_ms(3000); // Laissez le temps au truc de se lancer
     timer0_interrupt();
-    //timer1_interrupt();
+    // timer1_interrupt();
     magnet_interrupt();
 
 
-    char buffer[32];
-    char *buffer_hour = (char*)malloc(BUFFER_HOUR_SIZE * sizeof(char));
-    //int* hour = (int*) malloc(4 * sizeof(int));
-
+    // char buffer[32];
+    // char *buffer_hour = (char*)malloc(BUFFER_HOUR_SIZE * sizeof(char));
+    // //int* hour = (int*) malloc(4 * sizeof(int));
+    // int hour = 0;
+    // int *addr_hour = &hour;
+    // // USART_Transmit('z');
+    // bool receive = false;
+    // bool modify = true;
+    // char trash[32];
 
     bool receive = false;
     bool modify = true;
@@ -364,27 +446,28 @@ int main() {
     sei();
     while(1){
 
-        //char buffer[32];
+        // char buffer[32];
 
-        //sprintf(buffer,"counter = %d\n",timer1_count);
+        // sprintf(buffer,"OCR1A = %d et timer1_count = %d\n",OCR1A, timer1_count);
 
-        //USART_Transmit_String(buffer);
+        // USART_Transmit_String(buffer);
 
-        if (!receive){
-          USART_Receive_String(&buffer_hour);
-          fill_hour(buffer_hour);
-          timer0_count = 0;
-          receive = true;
-        }
+        // if (!receive){
+        //   USART_Receive_String(&buffer_hour);
+        //   fill_hour(buffer_hour, addr_hour);
+        //   receive = true;
+        // }
 
-        if (timer0_count == 0 && modify){
-          USART_Transmit_Hour();
-          buffer_hour_increment(timer0_count);
-          modify = false;
-        }
-        if (timer0_count  == 1 && !modify){
-          modify = true;
-        }
+        // if (timer0_count == 0 && modify){
+        //   buffer_hour_increment(addr_hour, timer0_count);
+        //   USART_Transmit_Hour(addr_hour);
+        //   modify = false;
+        // }
+        // if (timer0_count == 1 && !modify){
+        //   modify = true;
+        // }
+        // _delay_ms(500);
+        // USART_Transmit('a');
     }
-    free(buffer_hour);
+    // free(buffer_hour);
 }
