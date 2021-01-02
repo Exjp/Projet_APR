@@ -228,7 +228,7 @@ void timer0_interrupt(){
     // TCCR0A = _BV(WGM00); //WGM
 }
 void timer1_init(){
-    // /1 prescale + on init en plus OCR1A 
+    // /1 prescale + on init en plus OCR1A
     TCCR1B = _BV(CS10) | (1 << WGM12);
     // A testé si ça marche pas
     // TCCR1B = _BV(CS10) | (1 << WGM13) | (1 << WGM10);
@@ -250,7 +250,7 @@ void magnet_init(){
     PCICR |= (1 << PCIE2);
 }
 
-void magnet_interrupt(){ 
+void magnet_interrupt(){
     EIMSK |= (1 << INT0);
 }
 
@@ -319,7 +319,7 @@ int main() {
 
     _delay_ms(3000); // Laissez le temps au truc de se lancer
     timer0_interrupt();
-    timer1_interrupt();
+    //timer1_interrupt();
     magnet_interrupt();
 
 
@@ -336,24 +336,25 @@ int main() {
     sei();
     while(1){
 
-        char buffer[32];
+        //char buffer[32];
 
-        sprintf(buffer,"counter = %d\n",timer1_count);
+        //sprintf(buffer,"counter = %d\n",timer1_count);
 
-        USART_Transmit_String(buffer);
+        //USART_Transmit_String(buffer);
 
         if (!receive){
           USART_Receive_String(&buffer_hour);
           fill_hour(buffer_hour, addr_hour);
+          //timer0_count = 0;
           receive = true;
         }
 
-        if (tru_count == 0 && modify){
-          buffer_hour_increment(addr_hour, tru_count);
+        if (timer0_count == 0 && modify){
+          buffer_hour_increment(addr_hour, timer0_count);
           USART_Transmit_Hour(addr_hour);
           modify = false;
         }
-        if (tru_count == 1 && !modify){
+        if (timer0_count == 1 && !modify){
           modify = true;
         }
     }
