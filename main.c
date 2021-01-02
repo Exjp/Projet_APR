@@ -278,7 +278,7 @@ ISR(TIMER0_OVF_vect) {
     count++;
     if(count == 49){
         timer0_count++;
-        if(timer0_count == 60)
+        if(timer0_count == 2)
             timer0_count = 0;
         count = 0;
     }
