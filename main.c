@@ -304,7 +304,7 @@ ISR(INT0_vect) { // interuption aimant
 
 
 ISR(TIMER1_CAPT_vect) { // interruption comparaison
-    OCR1A = TCNT1 + revolution_Time - 1;
+    OCR1A = TCNT1 + size_Column - 1;
     next_Column = next_Column + 2;
     led_exec();
     // update position du pointeur du tableau d'affichage
@@ -345,7 +345,7 @@ int main() {
         if (!receive){
           USART_Receive_String(&buffer_hour);
           fill_hour(buffer_hour, addr_hour);
-          //timer0_count = 0;
+          timer0_count = 0;
           receive = true;
         }
 
