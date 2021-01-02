@@ -346,7 +346,7 @@ int main() {
     timer1_init();
     led_init();
 
-    _delay_ms(3000); // Laissez le temps au truc de se lancer
+    //_delay_ms(3000); // Laissez le temps au truc de se lancer
     timer0_interrupt();
     //timer1_interrupt();
     magnet_interrupt();
