@@ -11,7 +11,7 @@
 #define BAUD 38400
 #define MYUBRR FOSC/16/BAUD-1
 
-volatile int BUFFER_HOUR_SIZE = 7;
+volatile int BUFFER_HOUR_SIZE = 8;
 volatile int count = 0;
 volatile int timer0_count = 0;
 volatile int timer1_count = 0;
@@ -19,74 +19,201 @@ volatile int revolution_Time = 0;
 volatile int next_Column = 0;
 volatile int size_Column = 0;
 
-volatile int diplay_Tab[120] = {
-    0B00000000,0B00000001,      // D
-    0B00000000,0B00000001,
-    0B00000000,0B00000001,
-    0B00000000,0B00000001,
-    0B00000000,0B00000001,      // L
-    0B00000000,0B00000001,
-    0B00000000,0B00000001,
-    0B00000000,0B00000001,
-    0B00000000,0B00000001,      // R
-    0B00001110,0B00000001,
-    0B00010001,0B00000001,
-    0B00011111,0B00000001,
-    0B00000000,0B00000001,      // 0
-    0B00010000,0B00000001,
-    0B00010000,0B00000001,
-    0B00011111,0B00000001,
-    0B00000000,0B00000001,      // W
-    0B00010111,0B00000001,
-    0B00001101,0B00000001,
-    0B00011111,0B00000001,
-    0B00000000,0B00000001,
-    0B00011111,0B00000001,
-    0B00010001,0B00000001,
-    0B00011111,0B00000001,
-    0B00000000,0B00000001,      // 0
-    0B00011111,0B00000001,
-    0B00011110,0B00000001,
-    0B00011111,0B00000001,
-    0B00000000,0B00000001,      // L
-    0B00011111,0B00000001,
-    0B00010001,0B00000001,
-    0B00011111,0B00000001,
-    0B00000000,0B00000001,      // L
-    0B00010000,0B00000001,
-    0B00010000,0B00000001,
-    0B00011111,0B00000001,
-    0B00000000,0B00000001,      // E
-    0B00010000,0B00000001,
-    0B00010000,0B00000001,
-    0B00011111,0B00000001,
-    0B00000000,0B00000001,      // H
-    0B00010101,0B00000001,
-    0B00010101,0B00000001,
-    0B00011111,0B00000001,
-    0B00000000,0B00000001,
-    0B00011111,0B00000001,
-    0B00000100,0B00000001,
-    0B00011111,0B00000001,
-    0B00000000,0B00000001,
-    0B00000000,0B00000001,
-    0B00000000,0B00000001,
-    0B00000000,0B00000001,
-    0B00000000,0B00000001,
-    0B00000000,0B00000001,
-    0B00000000,0B00000001,
-    0B00000000,0B00000001,
-    0B00000000,0B00000001,
-    0B00000000,0B00000001,
-    0B00000000,0B00000001,
-    0B00000000,0B00000001,
+volatile int display_tab[120] = {
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000
 };
-//
-//
+
 int hour = 0;
 int *addr_hour = &hour;
 int minute = 0;
 int *addr_minute = &minute;
+int mod = 0;
+int *addr_mod = &mod;
+
+void draw_time(){
+  for (int i = 0; i < 120; i+=2){
+    display_tab[i] = 0B00000001;
+  }
+  for (int i = 1; i < 119; i+=2){
+    display_tab[i] = 0B00000000;
+  }
+
+  if ((*addr_hour) >= 12){
+    display_tab[120 - (((*addr_hour) - 12)*2)*5] = 0B11110001;
+    display_tab[120 - ((((*addr_hour) - 12)*2)*5) + 1] = 0B11111111;
+  }
+  else {
+    display_tab[120 - ((*addr_hour)*2)*5] = 0B11110001;
+    display_tab[120 - (((*addr_hour)*2)*5) + 1] = 0B11111111;
+  }
+
+  display_tab[120 - (*addr_minute)*2] = 0B11111111;
+  display_tab[120 - ((*addr_minute)*2) + 1] = 0B11111111;
+}
+
+void print_zero(int first_box){
+  display_tab[first_box] = 0B11111111;
+  display_tab[first_box + 2] = 0B10000001;
+  display_tab[first_box + 4] = 0B11111111;
+}
+void print_one(int first_box){
+  display_tab[first_box] = 0B11111111;
+  display_tab[first_box + 2] = 0B00000010;
+  display_tab[first_box + 4] = 0B00000100;
+}
+void print_two(int first_box){
+  display_tab[first_box] = 0B10011111;
+  display_tab[first_box + 2] = 0B10010001;
+  display_tab[first_box + 4] = 0B11110001;
+}
+void print_three(int first_box){
+  display_tab[first_box] = 0B11111111;
+  display_tab[first_box + 2] = 0B10010001;
+  display_tab[first_box + 4] = 0B10010001;
+}
+void print_four(int first_box){
+  display_tab[first_box] = 0B11111111;
+  display_tab[first_box + 2] = 0B00010000;
+  display_tab[first_box + 4] = 0B00011111;
+}
+void print_five(int first_box){
+  display_tab[first_box] = 0B11110001;
+  display_tab[first_box + 2] = 0B10010001;
+  display_tab[first_box + 4] = 0B10011111;
+}
+void print_six(int first_box){
+  display_tab[first_box] = 0B11110001;
+  display_tab[first_box + 2] = 0B10010001;
+  display_tab[first_box + 4] = 0B11111111;
+}
+void print_seven(int first_box){
+  display_tab[first_box] = 0B11111111;
+  display_tab[first_box + 2] = 0B00000001;
+  display_tab[first_box + 4] = 0B00000001;
+}
+void print_eight(int first_box){
+  display_tab[first_box] = 0B11111111;
+  display_tab[first_box + 2] = 0B10010001;
+  display_tab[first_box + 4] = 0B11111111;
+}
+void print_nine(int first_box){
+  display_tab[first_box] = 0B11111111;
+  display_tab[first_box + 2] = 0B10010001;
+  display_tab[first_box + 4] = 0B10011111;
+}
+
+void print_digit(int n, int pos){
+  switch (n){
+    case 0: print_zero(pos);break;
+    case 1: print_one(pos);break;
+    case 2: print_two(pos);break;
+    case 3: print_three(pos);break;
+    case 4: print_four(pos);break;
+    case 5: print_five(pos);break;
+    case 6: print_six(pos);break;
+    case 7: print_seven(pos);break;
+    case 8: print_eight(pos);break;
+    case 9: print_nine(pos);break;
+    default:print_zero(pos);break;
+  }
+}
+
+void print_separator(int first_box){
+  display_tab[first_box] = 0B10010000;
+}
+
+void print_hour(){
+  for (int i = 0; i < 120; i++){
+    display_tab[i] = 0B00000000;
+  }
+  if ((*addr_hour) == 0){
+    print_digit(0, 32);
+    print_digit(0, 24);
+  }
+  else{
+    print_digit((*addr_hour)/10, 32);
+    print_digit((*addr_hour)%10, 24);
+  }
+
+  print_separator(18);
+
+  if ((*addr_minute) == 0){
+    print_digit(0, 8);
+    print_digit(0, 0);
+  }
+  else{
+    print_digit((*addr_minute)/10, 8);
+    print_digit((*addr_minute)%10, 0);
+  }
+}
+
+void choose_mod(){
+  if ((*addr_mod) == 1){
+    print_hour();
+  }
+  else{
+    draw_time();
+  }
+}
 
 void USART_Transmit(char data){
     /* Wait for empty transmit buffer */
@@ -163,10 +290,10 @@ void USART_Transmit_Hour(){
 
     char *inter = " : ";
     char *end = " \n";
-    char h_value[10];
+    char h_value[32];
     h_value[0] = buffer[0];
     h_value[1] = buffer[1];
-    char m_value[10];
+    char m_value[32];
     m_value[0] = buffer[2];
     m_value[1] = buffer[3];
     size_t fullsize = strlen(h_value) + 1 + strlen(m_value) + 1 + strlen(inter) + 1 + strlen(end) + 1;
@@ -191,14 +318,17 @@ void buffer_hour_increment(int cpt){
   }
 }
 
-void fill_hour(char* buffer){
+void fill_hour_and_mod(char *buffer_hour){
   char buffer_tmp[5];
-  buffer_tmp[0] = buffer[0];
-  buffer_tmp[1] = buffer[1];
-  *addr_hour = atoi(buffer_tmp);
-  buffer_tmp[0] = buffer[2];
-  buffer_tmp[1] = buffer[3];
-  *addr_minute = atoi(buffer_tmp);
+  buffer_tmp[0] = buffer_hour[4];
+  (*addr_mod) = atoi(buffer_tmp);
+  buffer_tmp[0] = buffer_hour[0];
+  buffer_tmp[1] = buffer_hour[1];
+  (*addr_hour) = atoi(buffer_tmp);
+  buffer_tmp[0] = buffer_hour[2];
+  buffer_tmp[1] = buffer_hour[3];
+  (*addr_minute) = atoi(buffer_tmp);
+
 }
 
 void USART_Init(unsigned int ubrr){
@@ -288,8 +418,8 @@ void led_exec(){
         // int value1 = 0B00000001;
         // int value2 = 0B00000000;
 
-        int value1 = diplay_Tab[next_Column];
-        int value2 = diplay_Tab[next_Column + 1];
+        int value1 = display_tab[next_Column];
+        int value2 = display_tab[next_Column + 1];
         SPI_MasterTransmit(value1);
         SPI_MasterTransmit(value2);
         PORTC |= _BV(PC2);
@@ -305,16 +435,16 @@ void led_exec(){
 
 void udapte_display() {
     for(int i = 0; i < 120; i = i + 2) {
-        diplay_Tab[i] = 0;
-        diplay_Tab[i+1] = 0;
+        display_tab[i] = 0;
+        display_tab[i+1] = 0;
     }
 
     // int pos_hour = ((hour / 60) * 3) - 1;
     // int pos_min = ((min / 60)) * 3) - 1;
-//
-    // diplay_Tab[pos_hour] = 1;
-    // diplay_Tab[pos_min] = 1;
-    // diplay_Tab[pos_min + 1] = 1;
+    //
+    // display_tab[pos_hour] = 1;
+    // display_tab[pos_min] = 1;
+    // display_tab[pos_min + 1] = 1;
 
 }
 
@@ -328,7 +458,7 @@ ISR(TIMER0_OVF_vect) {
     count++;
     if(count == timer0_calc()){
         timer0_count++;
-        if(timer0_count == 60)
+        if(timer0_count == 2)
             timer0_count = 0;
         count = 0;
     }
@@ -347,28 +477,18 @@ ISR(INT0_vect) { // interuption aimant
     timer1_count = 0;
     next_Column = 0;
     OCR1A = size_Column - 1;
-    //char buffer1[32];
-
-    // sprintf(buffer1,"timer0 = %d, hour = %d & minute = %d\n",timer0_count, hour, minute);
-
-    //USART_Transmit_String(buffer1);
+    char buffer1[32];
+    sprintf(buffer1,"timer0 = %d, hour = %d & minute = %d\n",timer0_count, hour, minute);
+    USART_Transmit_String(buffer1);
     // update_display();d
     // led_exec();
     // reset le tableau d'affichage des leds
-
-
-
-
-
-
 }
 
 ISR(TIMER1_COMPA_vect) { // interruption comparaison
-    OCR1A = TCNT1 + size_Column - 1;
-    next_Column = next_Column + 2;
-
     led_exec();
-    // update position du pointeur du tableau d'affichage
+    OCR1A = TCNT1 + size_Column - 1;
+    next_Column = next_Column + 2;// update position du pointeur du tableau d'affichage
 }
 
 int main() {
@@ -377,43 +497,31 @@ int main() {
     timer0_init();
     timer1_init();
     led_init();
-
-    // _delay_ms(3000); // Laissez le temps au truc de se lancer
-
-
-    // char buffer2[32];
     char *buffer_hour = (char*)malloc(BUFFER_HOUR_SIZE * sizeof(char));
-    bool receive = false;
+    char *buffer_mod = (char*)malloc(32 * sizeof(char));
     bool modify = true;
-    char trash[32];
-
+    char buffer_tmp[40];
+    _delay_ms(5000);
+    sprintf(buffer_tmp, "1 num 2 hor 13501 13h50 mod 1\n");
+    USART_Transmit_String(buffer_tmp);
+    USART_Receive_String(&buffer_hour);
+    fill_hour_and_mod(buffer_hour);
+    timer0_interrupt();
+    timer1_interrupt();
+    magnet_interrupt();
     sei();
     while(1){
 
-
-        // sprintf(buffer2,"hour = %d et minute = %d\n",hour, minute );
-
-        // USART_Transmit_String(buffer2);
-
-        if (!receive){
-
-            USART_Receive_String(&buffer_hour);
-            timer0_interrupt();
-            timer1_interrupt();
-            magnet_interrupt();
-            fill_hour(buffer_hour);
-            receive = true;
-        }
-
         if (timer0_count == 0 && modify){
+            choose_mod();
             buffer_hour_increment(timer0_count);
-            USART_Transmit_Hour();
             modify = false;
         }
+
         if (timer0_count == 1 && !modify){
             modify = true;
         }
-        // _delay_ms(500);
     }
+    free(buffer_mod);
     free(buffer_hour);
 }
