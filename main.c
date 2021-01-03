@@ -1,85 +1,219 @@
 #include <avr/io.h>
 #include <util/delay.h>
 #include <stddef.h>
-#include<avr/interrupt.h>
-#include<stdio.h>
-#include<stdlib.h>
-#include<string.h>
+#include <avr/interrupt.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdbool.h>
 
 #define FOSC 13000000 // Clock Speed
 #define BAUD 38400
 #define MYUBRR FOSC/16/BAUD-1
 
+volatile int BUFFER_HOUR_SIZE = 8;
+volatile int count = 0;
+volatile int timer0_count = 0;
+volatile int timer1_count = 0;
+volatile int revolution_Time = 0;
+volatile int next_Column = 0;
+volatile int size_Column = 0;
 
-int count = 0;
-int timer0_count = 0;
-int timer1_count = 0;
-int revolution_Time = 0;
-
-int next_Column = 0;
-int size_Column = 0;
-int diplay_Tab[120] = {
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000,
-    0B00000001,0B00000000
+volatile int display_tab[120] = {
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000,
+    0B00000000,0B00000000
 };
+
+int hour = 0;
+int *addr_hour = &hour;
+int minute = 0;
+int *addr_minute = &minute;
+int mod = 0;
+int *addr_mod = &mod;
+
+void draw_time(){
+  for (int i = 0; i < 120; i+=2){
+    display_tab[i] = 0B00000001;
+  }
+  for (int i = 1; i < 119; i+=2){
+    display_tab[i] = 0B00000000;
+  }
+
+  if ((*addr_hour) >= 12){
+    display_tab[120 - (((*addr_hour) - 12)*2)*5] = 0B11110001;
+    display_tab[120 - ((((*addr_hour) - 12)*2)*5) + 1] = 0B11111111;
+  }
+  else {
+    display_tab[120 - ((*addr_hour)*2)*5] = 0B11110001;
+    display_tab[120 - (((*addr_hour)*2)*5) + 1] = 0B11111111;
+  }
+
+  display_tab[120 - (*addr_minute)*2] = 0B11111111;
+  display_tab[120 - ((*addr_minute)*2) + 1] = 0B11111111;
+}
+
+void print_zero(int first_box){
+  display_tab[first_box] = 0B11111111;
+  display_tab[first_box + 2] = 0B10000001;
+  display_tab[first_box + 4] = 0B11111111;
+}
+void print_one(int first_box){
+  display_tab[first_box] = 0B11111111;
+  display_tab[first_box + 2] = 0B00000010;
+  display_tab[first_box + 4] = 0B00000100;
+}
+void print_two(int first_box){
+  display_tab[first_box] = 0B10011111;
+  display_tab[first_box + 2] = 0B10010001;
+  display_tab[first_box + 4] = 0B11110001;
+}
+void print_three(int first_box){
+  display_tab[first_box] = 0B11111111;
+  display_tab[first_box + 2] = 0B10010001;
+  display_tab[first_box + 4] = 0B10010001;
+}
+void print_four(int first_box){
+  display_tab[first_box] = 0B11111111;
+  display_tab[first_box + 2] = 0B00010000;
+  display_tab[first_box + 4] = 0B00011111;
+}
+void print_five(int first_box){
+  display_tab[first_box] = 0B11110001;
+  display_tab[first_box + 2] = 0B10010001;
+  display_tab[first_box + 4] = 0B10011111;
+}
+void print_six(int first_box){
+  display_tab[first_box] = 0B11110001;
+  display_tab[first_box + 2] = 0B10010001;
+  display_tab[first_box + 4] = 0B11111111;
+}
+void print_seven(int first_box){
+  display_tab[first_box] = 0B11111111;
+  display_tab[first_box + 2] = 0B00000001;
+  display_tab[first_box + 4] = 0B00000001;
+}
+void print_eight(int first_box){
+  display_tab[first_box] = 0B11111111;
+  display_tab[first_box + 2] = 0B10010001;
+  display_tab[first_box + 4] = 0B11111111;
+}
+void print_nine(int first_box){
+  display_tab[first_box] = 0B11111111;
+  display_tab[first_box + 2] = 0B10010001;
+  display_tab[first_box + 4] = 0B10011111;
+}
+
+void print_digit(int n, int pos){
+  switch (n){
+    case 0: print_zero(pos);break;
+    case 1: print_one(pos);break;
+    case 2: print_two(pos);break;
+    case 3: print_three(pos);break;
+    case 4: print_four(pos);break;
+    case 5: print_five(pos);break;
+    case 6: print_six(pos);break;
+    case 7: print_seven(pos);break;
+    case 8: print_eight(pos);break;
+    case 9: print_nine(pos);break;
+    default:print_zero(pos);break;
+  }
+}
+
+void print_separator(int first_box){
+  display_tab[first_box] = 0B10010000;
+}
+
+void print_hour(){
+  for (int i = 0; i < 120; i++){
+    display_tab[i] = 0B00000000;
+  }
+  if ((*addr_hour) == 0){
+    print_digit(0, 32);
+    print_digit(0, 24);
+  }
+  else{
+    print_digit((*addr_hour)/10, 32);
+    print_digit((*addr_hour)%10, 24);
+  }
+
+  print_separator(18);
+
+  if ((*addr_minute) == 0){
+    print_digit(0, 8);
+    print_digit(0, 0);
+  }
+  else{
+    print_digit((*addr_minute)/10, 8);
+    print_digit((*addr_minute)%10, 0);
+  }
+}
+
+void choose_mod(){
+  if ((*addr_mod) == 1){
+    print_hour();
+  }
+  else{
+    draw_time();
+  }
+}
 
 void USART_Transmit(char data){
     /* Wait for empty transmit buffer */
@@ -95,6 +229,7 @@ void USART_Transmit_String(char *s){
         cp += 1;
     }
 }
+
 unsigned char USART_Receive(void){
     /* Wait for data to be received */
     while (!(UCSR0A & (1<<RXC0)));
@@ -102,11 +237,98 @@ unsigned char USART_Receive(void){
     return UDR0;
 }
 
-unsigned char USART_Receive2(void){
-    /* Wait for data to be received */
-    while (!(UCSR0A & (1<<RXC0)));
-    /* Get and return received data from buffer */
-    return UDR0;
+void USART_Receive_String(char **buffer){
+    int cpt = 0;
+    do{
+        (*buffer)[cpt] = USART_Receive();
+    } while ((*buffer)[cpt++] != '\n');
+}
+
+void USART_Transmit_Hour(){
+    char buffer[32];
+    char bufferTmpHour[32];
+    char bufferTmpMinute[32];
+    sprintf(bufferTmpHour,"%d",*addr_hour);
+    sprintf(bufferTmpMinute,"%d",*addr_minute);
+
+    if ((*addr_hour) == 0 && (*addr_minute) < 10){
+      buffer[0] = '0';
+      buffer[1] = '0';
+      buffer[2] = '0';
+      buffer[3] = bufferTmpMinute[0];
+    }
+    else if ((*addr_hour) == 0 && (*addr_minute) >= 10){
+      buffer[0] = '0';
+      buffer[1] = '0';
+      buffer[2] = bufferTmpMinute[0];
+      buffer[3] = bufferTmpMinute[1];
+    }
+    else if ((*addr_hour) < 10 && (*addr_minute) < 10){
+      buffer[0] = '0';
+      buffer[1] = bufferTmpHour[0];
+      buffer[2] = '0';
+      buffer[3] = bufferTmpMinute[0];
+    }
+    else if ((*addr_hour) < 10 && (*addr_minute) >= 10){
+      buffer[0] = '0';
+      buffer[1] = bufferTmpHour[0];
+      buffer[2] = bufferTmpMinute[0];
+      buffer[3] = bufferTmpMinute[1];
+    }
+    else if ((*addr_hour) >= 10 && (*addr_minute) < 10){
+      buffer[0] = bufferTmpHour[0];
+      buffer[1] = bufferTmpHour[1];
+      buffer[2] = '0';
+      buffer[3] = bufferTmpMinute[0];
+    }
+    else {
+      buffer[0] = bufferTmpHour[0];
+      buffer[1] = bufferTmpHour[1];
+      buffer[2] = bufferTmpMinute[0];
+      buffer[3] = bufferTmpMinute[1];
+    }
+
+    char *inter = " : ";
+    char *end = " \n";
+    char h_value[32];
+    h_value[0] = buffer[0];
+    h_value[1] = buffer[1];
+    char m_value[32];
+    m_value[0] = buffer[2];
+    m_value[1] = buffer[3];
+    size_t fullsize = strlen(h_value) + 1 + strlen(m_value) + 1 + strlen(inter) + 1 + strlen(end) + 1;
+    char * response = (char *) malloc(fullsize);
+    strcat(response, h_value);
+    strcat(response, inter);
+    strcat(response, m_value);
+    strcat(response, end);
+    USART_Transmit_String(response);
+}
+
+void buffer_hour_increment(int cpt){
+  (*addr_minute)++;
+
+  if ((*addr_minute) == 60){
+    (*addr_hour)++;
+    (*addr_minute) = 0;
+  }
+
+  if ((*addr_hour) == 24){
+    (*addr_hour) = 0;
+  }
+}
+
+void fill_hour_and_mod(char *buffer_hour){
+  char buffer_tmp[5];
+  buffer_tmp[0] = buffer_hour[4];
+  (*addr_mod) = atoi(buffer_tmp);
+  buffer_tmp[0] = buffer_hour[0];
+  buffer_tmp[1] = buffer_hour[1];
+  (*addr_hour) = atoi(buffer_tmp);
+  buffer_tmp[0] = buffer_hour[2];
+  buffer_tmp[1] = buffer_hour[3];
+  (*addr_minute) = atoi(buffer_tmp);
+
 }
 
 void USART_Init(unsigned int ubrr){
@@ -140,10 +362,7 @@ void led_init(){
     DDRC |= _BV(PC1);
     DDRC |= _BV(PC2);
     DDRB |= _BV(PB2); // faut le mettre à 0, ça peut merder (histoire master/slave)s
-
-
 }
-
 
 void timer0_init(){
     // On active le timer
@@ -151,9 +370,8 @@ void timer0_init(){
     // TCCR0B = (1<<CS00) | (1<<CS02);
     TCCR0B = _BV(CS00) | _BV(CS02); //On va chercer le bit value de CS00 et CS02
     // TCCR0B = 0B00000101;
-    
-}
 
+}
 
 void timer0_interrupt(){
 
@@ -163,20 +381,26 @@ void timer0_interrupt(){
 
     // TCCR0A = _BV(WGM00); //WGM
 }
+
 void timer1_init(){
-    // /1 prescale + on init en plus OCR1A 
-    TCCR1B = _BV(CS10) | (1 << WGM12);
-    // A testé si ça marche pas
-    // TCCR1B = _BV(CS10) | (1 << WGM13) | (1 << WGM10);
-    // TCCR1B = _BV(CS10) | (1 << WGM13) | (1 << WGM11) | (1 << WGM10);
-    // TCCR1B = _BV(CS10) | (1 << WGM13) | (1 << WGM12) | (1 << WGM11) | (1 << WGM10);
+    // OCR1AL = 0B00011111;
+    // OCR1AH = 0B00011110;
+    OCR1A=0xFFFE;
+    TCNT1 = 0;
+    TCCR1A = 0;
+    TCCR1B = 0;
+    // /1 prescale + on init en plus OCR1A
+    // TCCR1B = _BV(CS10);
+    TCCR1B = _BV(CS12) ;
+    // TIMSK1 = (1 << TOIE1);
+    // USART_Transmit('p');
 }
 
 void timer1_interrupt(){
 
-     TIMSK1 = (1<<OCIE1A) | (1 <<  TOIE1); // + init interrupt compare register OCR1A
+    TIMSK1 = (1<<OCIE1A) | (1 << TOIE1);
+     // + init interrupt compare register OCR1A
 }
-
 
 void magnet_init(){
     //active la broche PD2 en mode input pour pouvoir lire l'état du capteur aimant
@@ -186,17 +410,16 @@ void magnet_init(){
     PCICR |= (1 << PCIE2);
 }
 
-void magnet_interrupt(){ 
+void magnet_interrupt(){
     EIMSK |= (1 << INT0);
 }
-
 
 void led_exec(){
         // int value1 = 0B00000001;
         // int value2 = 0B00000000;
 
-        int value1 = diplay_Tab[next_Column];
-        int value2 = diplay_Tab[next_Column + 1];
+        int value1 = display_tab[next_Column];
+        int value2 = display_tab[next_Column + 1];
         SPI_MasterTransmit(value1);
         SPI_MasterTransmit(value2);
         PORTC |= _BV(PC2);
@@ -210,40 +433,62 @@ void led_exec(){
         // PORTC &= _BV(PC2);
 }
 
+void udapte_display() {
+    for(int i = 0; i < 120; i = i + 2) {
+        display_tab[i] = 0;
+        display_tab[i+1] = 0;
+    }
+
+    // int pos_hour = ((hour / 60) * 3) - 1;
+    // int pos_min = ((min / 60)) * 3) - 1;
+    //
+    // display_tab[pos_hour] = 1;
+    // display_tab[pos_min] = 1;
+    // display_tab[pos_min + 1] = 1;
+
+}
+
+int timer0_calc(){
+    int prescaler_timer0 = 1024;
+    int size_register_timer0 = 256;
+    return (FOSC / prescaler_timer0) / size_register_timer0;
+}
+
 ISR(TIMER0_OVF_vect) {
     count++;
-    if(count == 49){
+    if(count == timer0_calc()){
         timer0_count++;
-        if(timer0_count == 60)
+        if(timer0_count == 2)
             timer0_count = 0;
         count = 0;
     }
 }
 
-
 ISR(TIMER1_OVF_vect) {
-    timer1_count++;
+
 }
 
 ISR(INT0_vect) { // interuption aimant
-    revolution_Time = timer1_count;
+    // int tmp = TCNT1;
+
+    revolution_Time = TCNT1;
     size_Column = revolution_Time / 60;
     TCNT1 = 0;
     timer1_count = 0;
     next_Column = 0;
     OCR1A = size_Column - 1;
-
-    led_exec();
+    char buffer1[32];
+    sprintf(buffer1,"timer0 = %d, hour = %d & minute = %d\n",timer0_count, hour, minute);
+    USART_Transmit_String(buffer1);
+    // update_display();d
+    // led_exec();
     // reset le tableau d'affichage des leds
 }
 
-
-
-ISR(TIMER1_CAPT_vect) { // interruption comparaison
-    OCR1A = TCNT1 + revolution_Time - 1;
-    next_Column = next_Column + 2;
+ISR(TIMER1_COMPA_vect) { // interruption comparaison
     led_exec();
-    // update position du pointeur du tableau d'affichage
+    OCR1A = TCNT1 + size_Column - 1;
+    next_Column = next_Column + 2;// update position du pointeur du tableau d'affichage
 }
 
 int main() {
@@ -252,37 +497,31 @@ int main() {
     timer0_init();
     timer1_init();
     led_init();
-
-    _delay_ms(3000); // Laissez le temps au truc de se lancer
+    char *buffer_hour = (char*)malloc(BUFFER_HOUR_SIZE * sizeof(char));
+    char *buffer_mod = (char*)malloc(32 * sizeof(char));
+    bool modify = true;
+    char buffer_tmp[40];
+    _delay_ms(5000);
+    sprintf(buffer_tmp, "1 num 2 hor 13501 13h50 mod 1\n");
+    USART_Transmit_String(buffer_tmp);
+    USART_Receive_String(&buffer_hour);
+    fill_hour_and_mod(buffer_hour);
     timer0_interrupt();
     timer1_interrupt();
     magnet_interrupt();
-
-    
     sei();
     while(1){
-        
-        
-        // MAGNET
-        //USART_Transmit_String(" Nothing to see buds ");
-        //char s = USART_Receive();
 
-        // value = PIND; //Aimant: recupérer la veleur du capteur aimant
-        // char res = value + '0'; //transformation de l'int en char
-        // char send_back = receive;
-        // USART_Transmit(send_back);
+        if (timer0_count == 0 && modify){
+            choose_mod();
+            buffer_hour_increment(timer0_count);
+            modify = false;
+        }
 
-
-        char buffer[32];
-
-        sprintf(buffer,"counter = %d\n",timer1_count);
-
-        USART_Transmit_String(buffer);
-
-        // led_exec();
-
-        _delay_ms(1000);
-
-
+        if (timer0_count == 1 && !modify){
+            modify = true;
+        }
     }
+    free(buffer_mod);
+    free(buffer_hour);
 }
