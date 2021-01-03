@@ -20,134 +20,69 @@ volatile int next_Column = 0;
 volatile int size_Column = 0;
 
 volatile int diplay_Tab[120] = {
-    0B00000001,0B00000000,     // T
-    0B00011111,0B00000000,
-    0B00000001,0B00000000,
-    0B00000000,0B00000000,
-    0B00011111,0B00000000,     // E
-    0B00010101,0B00000000,
-    0B00010101,0B00000000,
-    0B00000000,0B00000000,
-    0B00011111,0B00000000,     // C
-    0B00010001,0B00000000,
-    0B00010001,0B00000000,
-    0B00000000,0B00000000,
-    0B00011111,0B00000000,     // H
-    0B00000100,0B00000000,
-    0B00011111,0B00000000,
-    0B00000000,0B00000000,
-    0B00010111,0B00000000,     // y
-    0B00010100,0B00000000,
-    0B00011111,0B00000000,
-    0B00000000,0B00000000,
-    0B00011111,0B00000000,     // D
-    0B00010001,0B00000000,
-    0B00001110,0B00000000,
-    0B00000000,0B00000000,
-    0B00011111,0B00000000,     // I
-    0B00000000,0B00000000,
-    0B00010111,0B00000000,     // Y
-    0B00010100,0B00000000,
-    0B00011111,0B00000000,
-    0B00100001,0B00000000,
-    0B01000001,0B00000000,
-    0B01000001,0B00000000,
-    0B01000001,0B00000000,
-    0B01000001,0B00000000,
-    0B01000001,0B00000000,
-    0B00100001,0B00000000,
-    0B00100001,0B00000000,
-    0B00100001,0B00000000,
-    0B00100001,0B10000000,
-    0B00100001,0B10000000,
-    0B00000001,0B10000000,
-    0B00000001,0B10000000,
-    0B00000001,0B10000000,
-    0B00000001,0B01000000,
-    0B00000001,0B01000000,
-    0B00000001,0B01000000,
-    0B00000001,0B01000000,
-    0B00000001,0B01000000,
-    0B00000001,0B00100000,
-    0B00000001,0B00100000,
-    0B00000001,0B00100000,
-    0B00000001,0B00100000,
-    0B00000001,0B00100000,
-    0B00000001,0B00010000,
-    0B00000001,0B00010000,
-    0B00000001,0B00010000,
-    0B00000001,0B00010000,
-    0B00000001,0B00010000,
-    0B00000001,0B00001000,
-    0B00000001,0B00000100
+    0B00000000,0B00000001,      // D
+    0B00000000,0B00000001,
+    0B00000000,0B00000001,
+    0B00000000,0B00000001,
+    0B00000000,0B00000001,      // L
+    0B00000000,0B00000001,
+    0B00000000,0B00000001,
+    0B00000000,0B00000001,
+    0B00000000,0B00000001,      // R
+    0B00001110,0B00000001,
+    0B00010001,0B00000001,
+    0B00011111,0B00000001,
+    0B00000000,0B00000001,      // 0
+    0B00010000,0B00000001,
+    0B00010000,0B00000001,
+    0B00011111,0B00000001,
+    0B00000000,0B00000001,      // W
+    0B00010111,0B00000001,
+    0B00001101,0B00000001,
+    0B00011111,0B00000001,
+    0B00000000,0B00000001,
+    0B00011111,0B00000001,
+    0B00010001,0B00000001,
+    0B00011111,0B00000001,
+    0B00000000,0B00000001,      // 0
+    0B00011111,0B00000001,
+    0B00011110,0B00000001,
+    0B00011111,0B00000001,
+    0B00000000,0B00000001,      // L
+    0B00011111,0B00000001,
+    0B00010001,0B00000001,
+    0B00011111,0B00000001,
+    0B00000000,0B00000001,      // L
+    0B00010000,0B00000001,
+    0B00010000,0B00000001,
+    0B00011111,0B00000001,
+    0B00000000,0B00000001,      // E
+    0B00010000,0B00000001,
+    0B00010000,0B00000001,
+    0B00011111,0B00000001,
+    0B00000000,0B00000001,      // H
+    0B00010101,0B00000001,
+    0B00010101,0B00000001,
+    0B00011111,0B00000001,
+    0B00000000,0B00000001,
+    0B00011111,0B00000001,
+    0B00000100,0B00000001,
+    0B00011111,0B00000001,
+    0B00000000,0B00000001,
+    0B00000000,0B00000001,
+    0B00000000,0B00000001,
+    0B00000000,0B00000001,
+    0B00000000,0B00000001,
+    0B00000000,0B00000001,
+    0B00000000,0B00000001,
+    0B00000000,0B00000001,
+    0B00000000,0B00000001,
+    0B00000000,0B00000001,
+    0B00000000,0B00000001,
+    0B00000000,0B00000001,
 };
-/*
-
-volatile int diplay_Tab[120] = {
-    0B00000000,0B00000001,
-    0B00000000,0B00000001,
-    0B00000000,0B00000001,
-    0B00000000,0B00000001,
-    0B00000000,0B00000001,
-    0B00000000,0B00000001,
-    0B00000000,0B00000001,
-    0B00000000,0B00000001,
-    0B00000000,0B00000001,
-    0B00000000,0B00000001,
-    0B00000000,0B00000000,
-    0B00000000,0B00000000,
-    0B00000000,0B00000000,
-    0B00000000,0B00000000,
-    0B00000000,0B00000000,
-    0B00000000,0B00000000,
-    0B00000000,0B00000000,
-    0B00000000,0B00000000,
-    0B00000000,0B00000000,
-    0B00000000,0B00000000,
-    0B00000000,0B00000000,
-    0B00000000,0B00000000,
-    0B00000000,0B00000000,
-    0B00000000,0B00000000,
-    0B00000000,0B00000000,
-    0B00000000,0B00000000,
-    0B00000000,0B00000000,
-    0B00000000,0B00000000,
-    0B00000000,0B00000000,
-    0B00000000,0B00000000,
-    0B00000000,0B00000000,
-    0B00000000,0B00000000,
-    0B00000000,0B00000000,
-    0B00000000,0B00000000,
-    0B00000000,0B00000000,
-    0B00000000,0B00000000,
-    0B00000000,0B00000000,
-    0B00000000,0B00000000,
-    0B00000000,0B00000000,
-    0B00000000,0B00000000,
-    0B00000000,0B00000000,
-    0B00000000,0B00000000,
-    0B00000000,0B00000000,
-    0B00000000,0B00000000,
-    0B00000000,0B00000000,
-    0B00000000,0B00000000,
-    0B00000000,0B00000000,
-    0B00000000,0B00000000,
-    0B00000000,0B00000000,
-    0B00000000,0B00000000,
-    0B00000000,0B00000000,
-    0B00000000,0B00000000,
-    0B00000000,0B00000000,
-    0B00000000,0B00000000,
-    0B00000000,0B00000000,
-    0B00000000,0B00000000,
-    0B00000000,0B00000000,
-    0B00000000,0B00000000,
-    0B00000000,0B00000000,
-    0B00000000,0B00000000
-};
-
-*/
-
+//
+//
 int hour = 0;
 int *addr_hour = &hour;
 int minute = 0;
@@ -327,14 +262,13 @@ void timer1_init(){
     // /1 prescale + on init en plus OCR1A
     // TCCR1B = _BV(CS10);
     TCCR1B = _BV(CS12) ;
-    TIMSK1 = (1<<OCIE1A) | (1 << TOIE1);
     // TIMSK1 = (1 << TOIE1);
     // USART_Transmit('p');
 }
 
 void timer1_interrupt(){
 
-    //  USART_Transmit('z');
+    TIMSK1 = (1<<OCIE1A) | (1 << TOIE1);
      // + init interrupt compare register OCR1A
 }
 
@@ -377,16 +311,22 @@ void udapte_display() {
 
     // int pos_hour = ((hour / 60) * 3) - 1;
     // int pos_min = ((min / 60)) * 3) - 1;
-
+//
     // diplay_Tab[pos_hour] = 1;
     // diplay_Tab[pos_min] = 1;
     // diplay_Tab[pos_min + 1] = 1;
 
 }
 
+int timer0_calc(){
+    int prescaler_timer0 = 1024;
+    int size_register_timer0 = 256;
+    return (FOSC / prescaler_timer0) / size_register_timer0;
+}
+
 ISR(TIMER0_OVF_vect) {
     count++;
-    if(count == 49){
+    if(count == timer0_calc()){
         timer0_count++;
         if(timer0_count == 60)
             timer0_count = 0;
@@ -399,24 +339,25 @@ ISR(TIMER1_OVF_vect) {
 }
 
 ISR(INT0_vect) { // interuption aimant
-    int tmp = TCNT1;
+    // int tmp = TCNT1;
 
-    if(tmp != 0) {
-        revolution_Time = tmp;
-        size_Column = revolution_Time / 60;
-        TCNT1 = 0;
-        timer1_count = 0;
-        next_Column = 0;
-        OCR1A = size_Column - 1;
-        char buffer[32];
+    revolution_Time = TCNT1;
+    size_Column = revolution_Time / 60;
+    TCNT1 = 0;
+    timer1_count = 0;
+    next_Column = 0;
+    OCR1A = size_Column - 1;
+    //char buffer1[32];
 
-        sprintf(buffer,"OCR1A = %d et one turn = %d\n",OCR1A, revolution_Time);
+    // sprintf(buffer1,"timer0 = %d, hour = %d & minute = %d\n",timer0_count, hour, minute);
 
-        USART_Transmit_String(buffer);
-        // update_display();d
-        // led_exec();
-        // reset le tableau d'affichage des leds
-    }
+    //USART_Transmit_String(buffer1);
+    // update_display();d
+    // led_exec();
+    // reset le tableau d'affichage des leds
+
+
+
 
 
 
@@ -437,22 +378,11 @@ int main() {
     timer1_init();
     led_init();
 
-    //_delay_ms(3000); // Laissez le temps au truc de se lancer
-    timer0_interrupt();
-    // timer1_interrupt();
-    magnet_interrupt();
+    // _delay_ms(3000); // Laissez le temps au truc de se lancer
 
 
-    // char buffer[32];
-    // char *buffer_hour = (char*)malloc(BUFFER_HOUR_SIZE * sizeof(char));
-    // //int* hour = (int*) malloc(4 * sizeof(int));
-    // int hour = 0;
-    // int *addr_hour = &hour;
-    // // USART_Transmit('z');
-    // bool receive = false;
-    // bool modify = true;
-    // char trash[32];
-
+    // char buffer2[32];
+    char *buffer_hour = (char*)malloc(BUFFER_HOUR_SIZE * sizeof(char));
     bool receive = false;
     bool modify = true;
     char trash[32];
@@ -461,29 +391,29 @@ int main() {
     while(1){
 
 
+        // sprintf(buffer2,"hour = %d et minute = %d\n",hour, minute );
 
-
-        // char buffer[32];
-
-        // sprintf(buffer,"OCR1A = %d et timer1_count = %d\n",OCR1A, timer1_count);
-
-        // USART_Transmit_String(buffer);
+        // USART_Transmit_String(buffer2);
 
         if (!receive){
-           USART_Receive_String(&buffer_hour);
-           fill_hour(buffer_hour, addr_hour);
-           receive = true;
+
+            USART_Receive_String(&buffer_hour);
+            timer0_interrupt();
+            timer1_interrupt();
+            magnet_interrupt();
+            fill_hour(buffer_hour);
+            receive = true;
         }
 
         if (timer0_count == 0 && modify){
-           buffer_hour_increment(addr_hour, timer0_count);
-           USART_Transmit_Hour(addr_hour);
-           modify = false;
+            buffer_hour_increment(timer0_count);
+            USART_Transmit_Hour();
+            modify = false;
         }
         if (timer0_count == 1 && !modify){
-           modify = true;
+            modify = true;
         }
-        //_delay_ms(500);
+        // _delay_ms(500);
     }
-    // free(buffer_hour);
+    free(buffer_hour);
 }
