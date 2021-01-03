@@ -18,7 +18,7 @@ volatile int timer1_count = 0;
 volatile int revolution_Time = 0;
 volatile int next_Column = 0;
 volatile int size_Column = 0;
-/* Display tap initial
+
 volatile int diplay_Tab[120] = {
     0B00000001,0B00000000,     // T
     0B00011111,0B00000000,
@@ -81,7 +81,7 @@ volatile int diplay_Tab[120] = {
     0B00000001,0B00001000,
     0B00000001,0B00000100
 };
-*/
+/*
 
 volatile int diplay_Tab[120] = {
     0B00000000,0B00000001,
@@ -145,6 +145,9 @@ volatile int diplay_Tab[120] = {
     0B00000000,0B00000000,
     0B00000000,0B00000000
 };
+
+*/
+
 int hour = 0;
 int *addr_hour = &hour;
 int minute = 0;
@@ -322,8 +325,8 @@ void timer1_init(){
     TCCR1A = 0;
     TCCR1B = 0;
     // /1 prescale + on init en plus OCR1A
-    TCCR1B = _BV(CS10);
-    // TCCR1B = _BV(CS12) ;
+    // TCCR1B = _BV(CS10);
+    TCCR1B = _BV(CS12) ;
     TIMSK1 = (1<<OCIE1A) | (1 << TOIE1);
     // TIMSK1 = (1 << TOIE1);
     // USART_Transmit('p');
@@ -385,27 +388,38 @@ ISR(TIMER0_OVF_vect) {
     count++;
     if(count == 49){
         timer0_count++;
-        if(timer0_count == 2)
+        if(timer0_count == 60)
             timer0_count = 0;
         count = 0;
     }
 }
 
 ISR(TIMER1_OVF_vect) {
-    timer1_count++;
+
 }
 
 ISR(INT0_vect) { // interuption aimant
-    revolution_Time = timer1_count;
-    size_Column = revolution_Time / 60;
-    TCNT1 = 0;
-    timer1_count = 0;
-    next_Column = 0;
-    OCR1A = size_Column - 1;
+    int tmp = TCNT1;
 
-    // update_display();d
-    // led_exec();
-    // reset le tableau d'affichage des leds
+    if(tmp != 0) {
+        revolution_Time = tmp;
+        size_Column = revolution_Time / 60;
+        TCNT1 = 0;
+        timer1_count = 0;
+        next_Column = 0;
+        OCR1A = size_Column - 1;
+        char buffer[32];
+
+        sprintf(buffer,"OCR1A = %d et one turn = %d\n",OCR1A, revolution_Time);
+
+        USART_Transmit_String(buffer);
+        // update_display();d
+        // led_exec();
+        // reset le tableau d'affichage des leds
+    }
+
+
+
 }
 
 ISR(TIMER1_COMPA_vect) { // interruption comparaison
@@ -446,28 +460,30 @@ int main() {
     sei();
     while(1){
 
+
+
+
         // char buffer[32];
 
         // sprintf(buffer,"OCR1A = %d et timer1_count = %d\n",OCR1A, timer1_count);
 
         // USART_Transmit_String(buffer);
 
-        // if (!receive){
-        //   USART_Receive_String(&buffer_hour);
-        //   fill_hour(buffer_hour, addr_hour);
-        //   receive = true;
-        // }
+        if (!receive){
+           USART_Receive_String(&buffer_hour);
+           fill_hour(buffer_hour, addr_hour);
+           receive = true;
+        }
 
-        // if (timer0_count == 0 && modify){
-        //   buffer_hour_increment(addr_hour, timer0_count);
-        //   USART_Transmit_Hour(addr_hour);
-        //   modify = false;
-        // }
-        // if (timer0_count == 1 && !modify){
-        //   modify = true;
-        // }
-        // _delay_ms(500);
-        // USART_Transmit('a');
+        if (timer0_count == 0 && modify){
+           buffer_hour_increment(addr_hour, timer0_count);
+           USART_Transmit_Hour(addr_hour);
+           modify = false;
+        }
+        if (timer0_count == 1 && !modify){
+           modify = true;
+        }
+        //_delay_ms(500);
     }
     // free(buffer_hour);
 }
