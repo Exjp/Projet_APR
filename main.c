@@ -18,11 +18,8 @@ volatile int revolution_Time = 0;
 volatile int next_Column = 0;
 volatile int size_Column = 0;
 volatile int hour = 0;
-volatile int *addr_hour = &hour;
 volatile int minute = 0;
-volatile int *addr_minute = &minute;
 volatile int mod = 0;
-volatile int *addr_mod = &mod;
 
 
 
@@ -97,17 +94,17 @@ void draw_time() {
     display_tab[i] = 0B00000000;
   }
 
-  if ((*addr_hour) >= 12) {
-    display_tab[120 - (((*addr_hour) - 12)*2)*5] = 0B11110001;
-    display_tab[120 - ((((*addr_hour) - 12)*2)*5) + 1] = 0B11111111;
+  if (hour >= 12) {
+    display_tab[120 - ((hour - 12)*2)*5] = 0B11110001;
+    display_tab[120 - (((hour - 12)*2)*5) + 1] = 0B11111111;
   }
   else {
-    display_tab[120 - ((*addr_hour)*2)*5] = 0B11110001;
-    display_tab[120 - (((*addr_hour)*2)*5) + 1] = 0B11111111;
+    display_tab[120 - (hour*2)*5] = 0B11110001;
+    display_tab[120 - ((hour*2)*5) + 1] = 0B11111111;
   }
 
-  display_tab[120 - (*addr_minute)*2] = 0B11111111;
-  display_tab[120 - ((*addr_minute)*2) + 1] = 0B11111111;
+  display_tab[120 - minute*2] = 0B11111111;
+  display_tab[120 - (minute*2) + 1] = 0B11111111;
 }
 
 void print_zero(int first_box) {
@@ -185,29 +182,29 @@ void print_hour() {
   for (int i = 0; i < 120; i++) {
     display_tab[i] = 0B00000000;
   }
-  if ((*addr_hour) == 0) { 
+  if (hour == 0) { 
     print_digit(0, 32);
     print_digit(0, 24);
   }
   else{
-    print_digit((*addr_hour)/10, 32);
-    print_digit((*addr_hour)%10, 24);
+    print_digit(hour/10, 32);
+    print_digit(hour%10, 24);
   }
 
   print_separator(18);
 
-  if ((*addr_minute) == 0) {
+  if (minute == 0) {
     print_digit(0, 8);
     print_digit(0, 0);
   }
   else{
-    print_digit((*addr_minute)/10, 8);
-    print_digit((*addr_minute)%10, 0);
+    print_digit(minute/10, 8);
+    print_digit(minute%10, 0);
   }
 }
 
 void choose_mod() {
-  if ((*addr_mod) == 1){
+  if (mod == 1){
     print_hour();
   }
   else{
@@ -250,45 +247,45 @@ unsigned char USART_Receive(void) {
   return UDR0;
 }
 
-void USART_Receive_String(char **buffer) {
+void USART_Receive_String(char *buffer) {
   int cpt = 0;
   do{
-      (*buffer)[cpt] = USART_Receive();
-  } while ((*buffer)[cpt++] != '\n');
+      buffer[cpt] = USART_Receive();
+  } while (buffer[cpt++] != '\n');
 }
 
 void USART_Transmit_Hour() {
   char buffer[32];
   char bufferTmpHour[32];
   char bufferTmpMinute[32];
-  sprintf(bufferTmpHour,"%d", *addr_hour);
-  sprintf(bufferTmpMinute,"%d", *addr_minute);
+  sprintf(bufferTmpHour,"%d", hour);
+  sprintf(bufferTmpMinute,"%d", minute);
 
-  if ((*addr_hour) == 0 && (*addr_minute) < 10){
+  if (hour == 0 && minute < 10){
     buffer[0] = '0';
     buffer[1] = '0';
     buffer[2] = '0';
     buffer[3] = bufferTmpMinute[0];
   }
-  else if ((*addr_hour) == 0 && (*addr_minute) >= 10){
+  else if (hour == 0 && minute >= 10){
     buffer[0] = '0';
     buffer[1] = '0';
     buffer[2] = bufferTmpMinute[0];
     buffer[3] = bufferTmpMinute[1];
   }
-  else if ((*addr_hour) < 10 && (*addr_minute) < 10){
+  else if (hour < 10 && minute < 10){
     buffer[0] = '0';
     buffer[1] = bufferTmpHour[0];
     buffer[2] = '0';
     buffer[3] = bufferTmpMinute[0];
   }
-  else if ((*addr_hour) < 10 && (*addr_minute) >= 10){
+  else if (hour < 10 && minute >= 10){
     buffer[0] = '0';
     buffer[1] = bufferTmpHour[0];
     buffer[2] = bufferTmpMinute[0];
     buffer[3] = bufferTmpMinute[1];
   }
-  else if ((*addr_hour) >= 10 && (*addr_minute) < 10){
+  else if (hour >= 10 && minute < 10){
     buffer[0] = bufferTmpHour[0];
     buffer[1] = bufferTmpHour[1];
     buffer[2] = '0';
@@ -310,7 +307,7 @@ void USART_Transmit_Hour() {
   m_value[0] = buffer[2];
   m_value[1] = buffer[3];
   size_t fullsize = strlen(h_value) + 1 + strlen(m_value) + 1 + strlen(inter) + 1 + strlen(end) + 1;
-  char * response = (char *) malloc(fullsize);
+  char response[fullsize];
   strcat(response, h_value);
   strcat(response, inter);
   strcat(response, m_value);
@@ -319,28 +316,28 @@ void USART_Transmit_Hour() {
 }
 
 void buffer_hour_increment(int cpt) {
-  (*addr_minute)++;
+  minute++;
 
-  if ((*addr_minute) == 60){
-    (*addr_hour)++;
-    (*addr_minute) = 0;
+  if (minute == 60){
+    hour++;
+    minute = 0;
   }
 
-  if ((*addr_hour) == 24){
-    (*addr_hour) = 0;
+  if (hour == 24){
+    hour = 0;
   }
 }
 
 void fill_hour_and_mod(char *buffer_hour){
   char buffer_tmp[5];
   buffer_tmp[0] = buffer_hour[4];
-  (*addr_mod) = atoi(buffer_tmp);
+  mod = atoi(buffer_tmp);
   buffer_tmp[0] = buffer_hour[0];
   buffer_tmp[1] = buffer_hour[1];
-  (*addr_hour) = atoi(buffer_tmp);
+  hour = atoi(buffer_tmp);
   buffer_tmp[0] = buffer_hour[2];
   buffer_tmp[1] = buffer_hour[3];
-  (*addr_minute) = atoi(buffer_tmp);
+  minute = atoi(buffer_tmp);
 
 }
 
@@ -450,14 +447,14 @@ int main() {
   timer0_init();
   timer1_init();
   led_init();
-  char *buffer_hour = (char*)malloc(BUFFER_HOUR_SIZE * sizeof(char));
-  char *buffer_mod = (char*)malloc(32 * sizeof(char));
+  char buffer_hour[BUFFER_HOUR_SIZE];
+  char buffer_mod[32];
   bool modify = true;
   char buffer_tmp[40];
   _delay_ms(5000);
   sprintf(buffer_tmp, "1 num 2 hor 13501 13h50 mod 1\n");
   USART_Transmit_String(buffer_tmp);
-  USART_Receive_String(&buffer_hour);
+  USART_Receive_String(buffer_hour);
   fill_hour_and_mod(buffer_hour);
   timer0_interrupt();
   timer1_interrupt();
