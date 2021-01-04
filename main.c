@@ -415,10 +415,11 @@ ISR(TIMER0_OVF_vect) {
     count++;
     if(count == timer0_calc()){
         timer0_count++;
-        if(timer0_count == 60)
-            count = count - 24; // reduce temporal gap
-            timer0_count = 0;
         count = 0;
+        if(timer0_count == 60){
+            count = count + 24; // reduce temporal gap
+            timer0_count = 0;
+        }
     }
 }
 
@@ -433,7 +434,7 @@ ISR(INT0_vect) { // interuption aimant
   next_Column = 0;
   OCR1A = size_Column - 1;
   char buffer1[32];
-  sprintf(buffer1,"timer0 = %d, hour = %d & minute = %d\n",timer0_count ,hour , minute);
+  sprintf(buffer1,"count = %d, hour = %d & minute = %d\n",count ,hour , minute);
   USART_Transmit_String(buffer1);
 }
 
