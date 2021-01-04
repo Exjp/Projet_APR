@@ -407,7 +407,7 @@ void led_exec() {
 
 int timer0_calc() {
     int prescaler_timer0 = 1024;
-    int size_register_timer0 = 256;
+    int size_register_timer0 = 255;
     return (FOSC / prescaler_timer0) / size_register_timer0;
 }
 
@@ -417,7 +417,7 @@ ISR(TIMER0_OVF_vect) {
         timer0_count++;
         count = 0;
         if(timer0_count == 60){
-            count = count + 24; // reduce temporal gap
+            count = count + 13; // reduce temporal gap
             timer0_count = 0;
         }
     }
