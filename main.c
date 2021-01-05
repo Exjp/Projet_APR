@@ -452,7 +452,7 @@ int main() {
   bool modify = true;
   char buffer_tmp[40];
   _delay_ms(5000);
-  sprintf(buffer_tmp, "1 num 2 hor 13501 13h50 mod 1\n");
+  sprintf(buffer_tmp, "h:XX min:XX mod:X 13501 13h50 mod 1\n");
   USART_Transmit_String(buffer_tmp);
   USART_Receive_String(buffer_hour);
   fill_hour_and_mod(buffer_hour);
